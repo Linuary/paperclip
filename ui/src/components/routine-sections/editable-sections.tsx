@@ -252,7 +252,7 @@ export function OverviewSection({
               ref={descriptionEditorRef}
               value={editDraft.description}
               onChange={(description) => setEditDraft((current) => ({ ...current, description }))}
-              placeholder="Add instructions..."
+              placeholder={t("editableSections.addInstructions")}
               bordered={false}
               contentClassName="min-h-[120px] text-[15px] leading-7"
               mentions={mentionOptions}
@@ -268,7 +268,7 @@ export function OverviewSection({
             ref={descriptionEditorRef}
             value={editDraft.description}
             onChange={(description) => setEditDraft((current) => ({ ...current, description }))}
-            placeholder="Add instructions..."
+            placeholder={t("editableSections.addInstructions")}
             bordered={false}
             contentClassName="min-h-[120px] text-[15px] leading-7"
             mentions={mentionOptions}

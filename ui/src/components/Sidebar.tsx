@@ -174,12 +174,12 @@ export function Sidebar() {
           ) : null}
         </div>
 
-        <SidebarSection label="Work">
-          <SidebarNavItem to="/issues" label="Tasks" icon={CircleDot} />
-          <SidebarNavItem to="/routines" label="Routines" icon={Repeat} />
-          <SidebarNavItem to="/goals" label="Goals" icon={Target} />
-          <SidebarNavItem to="/artifacts" label="Artifacts" icon={Package} />
-          <SidebarNavItem to="/skills" label="Skills" icon={Boxes} />
+        <SidebarSection label={t("sidebar.work")}>
+          <SidebarNavItem to="/issues" label={t("sidebar.tasks")} icon={CircleDot} />
+          <SidebarNavItem to="/routines" label={t("sidebar.routines")} icon={Repeat} />
+          <SidebarNavItem to="/goals" label={t("sidebar.goals")} icon={Target} />
+          <SidebarNavItem to="/artifacts" label={t("sidebar.artifacts")} icon={Package} />
+          <SidebarNavItem to="/skills" label={t("sidebar.skills")} icon={Boxes} />
           {showWorkspacesLink ? (
             <SidebarNavItem to="/workspaces" label={t("sidebar.workspaces")} icon={GitBranch} />
           ) : null}
@@ -206,11 +206,11 @@ export function Sidebar() {
 
         <SidebarAgents streamlined={streamlined} />
 
-        <SidebarSection label="Company">
-          <SidebarNavItem to="/org" label="Org" icon={Network} />
-          <SidebarNavItem to="/costs" label="Costs" icon={DollarSign} />
-          <SidebarNavItem to="/activity" label="Activity" icon={History} />
-          <SidebarNavItem to="/company/settings" label="Settings" icon={Settings} />
+        <SidebarSection label={t("sidebar.company")}>
+          <SidebarNavItem to="/org" label={t("sidebar.org")} icon={Network} />
+          <SidebarNavItem to="/costs" label={t("sidebar.costs")} icon={DollarSign} />
+          <SidebarNavItem to="/activity" label={t("sidebar.activity")} icon={History} />
+          <SidebarNavItem to="/company/settings" label={t("sidebar.settings")} icon={Settings} />
         </SidebarSection>
 
         <PluginSlotOutlet

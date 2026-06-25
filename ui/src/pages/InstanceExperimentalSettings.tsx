@@ -357,17 +357,16 @@ export function InstanceExperimentalSettings() {
       <section className="rounded-xl border border-border bg-card p-5">
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-1.5">
-            <h2 className="text-sm font-semibold">Enable External Objects</h2>
+            <h2 className="text-sm font-semibold">{t("instanceSettings.experimental.enableExternalObjects")}</h2>
             <p className="max-w-2xl text-sm text-muted-foreground">
-              Detect external URLs in issues and show resolved status for pull requests, tickets, and other referenced
-              work objects.
+              {t("instanceSettings.experimental.enableExternalObjectsDesc")}
             </p>
           </div>
           <ToggleSwitch
             checked={enableExternalObjects}
             onCheckedChange={() => toggleMutation.mutate({ enableExternalObjects: !enableExternalObjects })}
             disabled={toggleMutation.isPending}
-            aria-label="Toggle external objects experimental setting"
+            aria-label={t("instanceSettings.experimental.toggleExternalObjects")}
           />
         </div>
       </section>
