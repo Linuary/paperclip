@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Agent } from "@paperclipai/shared";
+import { useTranslation } from "@/i18n";
 import { AlertTriangle, CheckCircle2, ChevronRight, CircleDashed, FileText, GitBranch, ImagePlus, ListChecks, Loader2, MessageSquareQuote, X, XCircle } from "lucide-react";
 import { Link } from "@/lib/router";
 import { formatAssigneeUserLabel } from "../lib/assignees";
@@ -1882,6 +1883,7 @@ export function IssueThreadInteractionCard({
   onCancelInteraction,
   onUploadImage,
 }: IssueThreadInteractionCardProps) {
+  const { t } = useTranslation();
   const isPlan = isPlanConfirmation(interaction);
   const planStyles = isPlan ? planStatusClasses(interaction.status) : null;
   const StatusIcon = planStyles ? planStyles.Icon : statusIcon(interaction.status);
@@ -1911,7 +1913,7 @@ export function IssueThreadInteractionCard({
           <div className="flex flex-wrap items-center gap-2">
             <span className={cn("inline-flex items-center gap-1 rounded-sm border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.16em]", styles.badge)}>
               <StatusIcon className="h-3.5 w-3.5" />
-              {isPlan ? "Plan" : interactionKindLabel(interaction.kind)}
+              {isPlan ? t('issue.interaction.plan') : interactionKindLabel(interaction.kind)}
               <span className="text-current/60">/</span>
               {planStyles ? planStyles.label : statusLabel(interaction.status)}
             </span>
@@ -1920,8 +1922,8 @@ export function IssueThreadInteractionCard({
               <span className="inline-flex items-center gap-1 rounded-sm border border-border/70 bg-transparent px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.16em] text-foreground/70">
                 <ListChecks className="h-3.5 w-3.5" />
                 {interaction.continuationPolicy === "wake_assignee_on_accept"
-                  ? "Wakes on confirm"
-                  : "Wakes assignee"}
+                  ? t('issue.interaction.wakesOnConfirm')
+                  : t('issue.interaction.wakesAssignee')}
               </span>
             ) : null}
           </div>
@@ -1929,14 +1931,14 @@ export function IssueThreadInteractionCard({
           <div className="mt-3 text-lg font-bold text-foreground">
             {interaction.title
               ?? (interaction.kind === "suggest_tasks"
-                ? "Suggested task tree"
+                ? t('issue.interaction.suggestedTaskTree')
                 : interaction.kind === "ask_user_questions"
-                  ? interaction.payload.title ?? "Questions for the operator"
+                  ? interaction.payload.title ?? t('issue.interaction.questionsForOperator')
                 : interaction.kind === "request_checkbox_confirmation"
-                  ? "Checkbox confirmation requested"
+                  ? t('issue.interaction.checkboxConfirmationRequested')
                   : isPlan
-                    ? "Plan review"
-                    : "Confirmation requested")}
+                    ? t('issue.interaction.planReview')
+                    : t('issue.interaction.confirmationRequested'))}
           </div>
           {interaction.summary ? (
             <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
@@ -1949,11 +1951,11 @@ export function IssueThreadInteractionCard({
           <TooltipTrigger asChild>
             <div className="rounded-sm border border-border/70 bg-transparent px-3 py-2 text-right text-xs text-muted-foreground">
               <div className="font-medium text-foreground">{formatShortDate(interaction.createdAt)}</div>
-              <div>proposed by {createdByLabel}</div>
+              <div>{t('issue.interaction.proposedBy', { name: createdByLabel })}</div>
             </div>
           </TooltipTrigger>
           <TooltipContent side="bottom" className="text-xs">
-            Created {formatDateTime(interaction.createdAt)}
+            {t('issue.interaction.created', { datetime: formatDateTime(interaction.createdAt) })}
           </TooltipContent>
         </Tooltip>
       </div>
@@ -1993,8 +1995,8 @@ export function IssueThreadInteractionCard({
 
       {resolvedByLabel ? (
         <div className="mt-4 border-t border-border/60 pt-3 text-xs text-muted-foreground">
-          Resolved by <span className="font-medium text-foreground">{resolvedByLabel}</span>
-          {interaction.resolvedAt ? ` on ${formatShortDate(interaction.resolvedAt)}` : ""}
+          {t('issue.interaction.resolvedBy', { name: resolvedByLabel })}
+          {interaction.resolvedAt ? ` ${t('issue.interaction.on', { date: formatShortDate(interaction.resolvedAt) })}` : ""}
         </div>
       ) : null}
     </div>

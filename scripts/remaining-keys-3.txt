@@ -1,0 +1,981 @@
+skills.agentCount|||{{count}} {{unit}}
+agent.runs.id|||ID
+issue.newDialog.existingWorkspaceStatus|||{{name}} · {{status}} · {{branch}}
+issue.columns.id|||ID
+project.archiveDescription|||Archive this project to hide it from the sidebar and project selectors.
+project.unarchiveDescription|||Unarchive this project to restore it in the sidebar and project selectors.
+project.archiving|||Archiving...
+project.unarchiving|||Unarchiving...
+project.archiveProject|||Archive project
+project.unarchiveProject|||Unarchive project
+project.sortTargetDate|||Target date
+project.sortAsc|||Asc
+project.sortDesc|||Desc
+project.changeIconColor|||Change project icon and color
+project.iconLabel|||Icon
+project.searchIcons|||Search icons...
+project.noIconsMatch|||No icons match
+project.colorLabel|||Color
+project.resetToNeutral|||Reset to neutral gray
+project.neutralDefault|||Neutral (default)
+project.leftNotice|||You left this project. It no longer appears in your sidebar.
+project.dismissMembershipNotice|||Dismiss project membership notice
+project.loadingWorkspaces|||Loading workspaces...
+project.tabs.pluginOperations|||Plugin operations
+project.project|||Project
+project.archivedToast|||"{{name}}" has been archived
+project.unarchivedToast|||"{{name}}" has been unarchived
+project.failedToArchive|||Failed to archive project
+project.failedToUnarchive|||Failed to unarchive project
+project.clearLocalFolderConfirm|||Clear local folder from this workspace?
+project.deleteLocalFolderConfirm|||Delete this workspace local folder?
+project.clearRepoConfirm|||Clear repo from this workspace?
+project.deleteRepoConfirm|||Delete this workspace repo?
+search.queryAriaLabel|||Search query
+search.clearAriaLabel|||Clear search
+search.identifierLookup|||Identifier lookup:
+search.identifierLookupDescBefore|||type
+search.identifierLookupDescAfter|||to jump straight to a task.
+search.quotedPhrases|||Quoted phrases:
+search.quotedPhrasesDesc|||wrap a phrase in quotes to match the exact sequence.
+search.keyboardShortcut|||⌘K:
+search.keyboardShortcutDesc|||reopens the command palette pre-seeded with your current query.
+search.errorServerStatus|||The server returned {{status}}.
+search.errorRequestFailed|||The request failed.
+search.errorDesc|||Your input and filters are still here, so you can retry or fall back to the Tasks filter.
+search.openTasksFilter|||Open Tasks filter view
+search.searchAllScopes|||Search all scopes
+search.createTaskFromQuery|||Create task from this query
+search.tryFewerTokens|||Try fewer tokens or a single distinctive term.
+search.tryIdentifierBefore|||Use an identifier shortcut like
+search.tryIdentifierAfter|||.
+search.wrapPhrases|||Wrap multi-word phrases in quotes.
+search.resultCount_one|||{{count}} result
+search.resultCount_other|||{{count}} results
+search.sortedByRelevance|||sorted by relevance
+search.allScopes|||All scopes
+search.unknownError|||Unknown error
+costs.tabBudgets|||Budgets
+costs.tabBillers|||Billers
+costs.tabFinance|||Finance
+costs.tokensAcrossEvents|||{{tokens}} tokens across request-scoped events
+costs.agentsPausedProjectsPaused|||{{agents}} agents paused · {{projects}} projects paused
+costs.budgetOf|||{{spend}} of {{budget}}
+costs.noMonthlyCap|||No monthly cap configured
+costs.debitsCredits|||{{debits}} debits · {{credits}} credits
+costs.estimatedInRange|||{{amount}} estimated in range
+costs.financeLedger|||Finance ledger
+costs.financeLedgerDesc|||Account-level charges that do not map to a single inference request.
+costs.debits|||Debits
+costs.eventsInRange|||{{count}} total event in range
+costs.credits|||Credits
+costs.creditsDesc|||Refunds, offsets, and credit returns
+costs.net|||Net
+costs.netDesc|||Debit minus credit for the selected period
+costs.estimatedDesc|||Estimated debits that are not yet invoice-authoritative
+costs.inferenceLedger|||Inference ledger
+costs.inferenceLedgerDesc|||Request-scoped inference spend for the selected period.
+costs.budgetAmount|||Budget {{amount}}
+costs.unlimitedBudget|||Unlimited budget
+costs.usage|||usage
+costs.budgetConsumed|||{{percent}}% of monthly budget consumed in this range.
+costs.byAgentDesc|||What each agent consumed in the selected period.
+costs.inOut|||in {{input}} · out {{output}}
+costs.apiSubscription|||{{api}} api · {{subscription}} subscription
+costs.byProjectDesc|||Run costs attributed through project-linked tasks.
+costs.noProjectCosts|||No project-attributed run costs yet.
+costs.unattributed|||Unattributed
+costs.noFinanceEventsTimeline|||No finance events yet. Add account-level charges once biller invoices or credits land.
+costs.budgetControlPlane|||Budget control plane
+costs.budgetControlPlaneDesc|||Hard-stop spend limits for agents and projects. Provider subscription quota stays separate and appears under Providers.
+costs.activeIncidents|||Active incidents
+costs.activeIncidentsDesc|||Open soft or hard threshold crossings
+costs.pendingApprovals|||Pending approvals
+costs.pendingApprovalsDesc|||Budget override approvals awaiting board action
+costs.pausedAgents|||Paused agents
+costs.pausedAgentsDesc|||Agent heartbeats blocked by budget
+costs.pausedProjects|||Paused projects
+costs.pausedProjectsDesc|||Project execution blocked by budget
+costs.resolveIncidents|||Resolve hard stops here by raising the budget or explicitly keeping the scope paused.
+costs.companyBudgets|||Company budgets
+costs.companyBudgetsDesc|||Company-wide monthly policy.
+costs.agentBudgets|||Agent budgets
+costs.agentBudgetsDesc|||Recurring monthly spend policies for individual agents.
+costs.projectBudgets|||Project budgets
+costs.projectBudgetsDesc|||Lifetime spend policies for execution-bound projects.
+costs.noBudgetPolicies|||No budget policies yet. Set agent and project budgets from their detail pages, or use the existing company monthly budget control.
+costs.noCostEventsPeriod|||No cost events in this period.
+costs.noBillableEvents|||No billable events in this period.
+costs.byBiller|||By biller
+costs.byBillerDesc|||Account-level financial events grouped by who charged or credited them.
+costs.noFinanceEvents|||No finance events yet.
+costs.dateTo|||to
+inbox.runExitedWithError|||Run exited with an error.
+inbox.requestedFromIp|||requested {{time}} from IP {{ip}}
+inbox.chooseColumns|||Choose which inbox columns stay visible
+inbox.enableNesting|||Enable parent-child nesting
+inbox.disableNesting|||Disable parent-child nesting
+inbox.markAllAsReadDescription_one|||This will mark {{count}} unread item as read.
+inbox.markAllAsReadDescription_other|||This will mark {{count}} unread items as read.
+inbox.allCategories|||All categories
+inbox.myRecentTasks|||My recent tasks
+inbox.joinRequests|||Join requests
+inbox.failedRuns|||Failed runs
+inbox.approvalStatus|||Approval status
+inbox.allApprovalStatuses|||All approval statuses
+inbox.needsAction|||Needs action
+inbox.noSearchResults|||No inbox items match your search.
+inbox.inboxZero|||Inbox zero.
+inbox.noNewItems|||No new inbox items.
+inbox.noRecentItems|||No recent inbox items.
+inbox.noFilterResults|||No inbox items match these filters.
+inbox.subTasksCount_one|||({{count}} sub-task)
+inbox.subTasksCount_other|||({{count}} sub-tasks)
+inbox.alertsHeading|||Alerts
+inbox.agentErrors_one|||{{count}} agent has errors
+inbox.agentErrors_other|||{{count}} agents have errors
+inbox.failedToApprove|||Failed to approve
+inbox.failedToReject|||Failed to reject
+inbox.failedToApproveJoinRequest|||Failed to approve join request
+inbox.failedToRejectJoinRequest|||Failed to reject join request
+inbox.failedToArchiveTask|||Failed to archive task
+inbox.failedToUndoArchive|||Failed to undo inbox archive
+activity.filterByType|||Filter by type
+activity.noAgents|||No agents set up yet. Add an agent to get started.
+activity.allAgentsPaused|||All agents are paused. Resume agents from the sidebar to see activity.
+activity.agentsRunning|||Your agents are running — activity will appear here shortly.
+activity.liveActivity|||Live activity from your agents
+activity.groupByTask|||Group by task
+activity.showFlat|||Show flat
+activity.filterBy|||Filter by
+activity.defaultEmptyMessage|||Activity from your agents will appear here.
+activity.madeUpdatesTo|||made {{count}} updates to
+activity.inProgress|||In Progress
+activity.inReview|||In Review
+activity.groupByTaskAria|||group by task
+activity.filterByAria|||filter by
+approval.noPendingApprovals|||No pending approvals.
+approval.noApprovalsYet|||No approvals yet.
+approval.failedToApprove|||Failed to approve
+approval.failedToReject|||Failed to reject
+approval.revisionRequestFailed|||Revision request failed
+approval.resubmitFailed|||Resubmit failed
+approval.commentFailed|||Comment failed
+approval.deleteFailed|||Delete failed
+approval.confirmed|||Approval confirmed
+approval.confirmedDescription|||Requesting agent was notified to review this approval and linked tasks.
+approval.seeFullRequest|||See full request
+approval.decisionNote|||Decision note: {{note}}
+approval.linkedTasks|||Linked Tasks
+approval.linkedTasksDescription|||Linked tasks remain open until the requesting agent follows up and closes them.
+approval.reviewLinkedTasks|||Review linked tasks
+approval.reviewLinkedTask|||Review linked task
+approval.openHiredAgent|||Open hired agent
+approval.backToApprovals|||Back to approvals
+approval.resolveBudgetStop|||Resolve this budget stop from the budget controls on
+approval.requestRevision|||Request revision
+approval.markResubmitted|||Mark resubmitted
+approval.confirmDeleteDisapprovedAgent|||Delete this disapproved agent? This cannot be undone.
+approval.deleteDisapprovedAgent|||Delete disapproved agent
+approval.commentsCount|||Comments ({{count}})
+approval.addCommentPlaceholder|||Add a comment...
+approval.posting|||Posting…
+approval.postComment|||Post comment
+artifact.searchAria|||Search artifacts
+artifact.clearSearchAria|||Clear artifact search
+artifact.groupTitle|||Group artifacts
+artifact.noStacksMatchSearch|||No artifact stacks match this search.
+artifact.noStacksYet|||No artifact stacks yet.
+artifact.noMatchSearch|||No artifacts match this search.
+artifact.noInStackMatchFilters|||No artifacts in this stack match the current filters.
+artifact.noYet|||No artifacts yet. Outputs attached to issues will appear here.
+artifact.noOfTypeYet|||No artifacts of this type yet.
+artifact.loadingMore|||Loading more artifacts...
+artifact.updating|||Updating artifacts...
+artifact.kindImages|||Images
+artifact.kindVideos|||Videos
+artifact.kindDocuments|||Documents
+artifact.kindText|||Text
+artifact.kindFiles|||Files
+artifact.groupTask|||Task
+artifact.groupParentTask|||Parent task
+artifact.filterInProgress|||In Progress
+artifact.filterForReview|||For Review
+artifact.noDeliverablesYet|||Your team's deliverables and plans will appear here as they're produced.
+artifact.noMatchFilter|||No artifacts match this filter.
+artifact.statusInProgress|||In Progress
+artifact.statusForReview|||For Review
+artifact.statusChangesRequested|||Changes Requested
+artifact.docLoading|||Loading document...
+artifact.docNotAvailable|||Document not available yet.
+artifact.docEmpty|||Document is empty.
+artifact.needsReview|||This document needs your review.
+artifact.approvedHireTasks|||Approved — hire tasks created
+artifact.changesRequestedRevising|||Changes requested — CEO is revising
+companySettings.logo|||Logo
+companySettings.mib|||MiB
+companySettings.attachmentSizeError|||Enter a whole number from 1 to {{max}}.
+companySettings.saving|||Saving...
+companySettings.saveChanges|||Save changes
+companySettings.requireBoardApproval|||Require board approval for new hires
+companySettings.requireBoardApprovalHint|||New agent hires stay pending until approved by board.
+companySettings.sendToCloud|||Send to Paperclip Cloud
+companySettings.noCompanySelected|||No company selected. Select a company from the switcher above.
+companySettings.archiveDescription|||Archive this company to hide it from the sidebar. This persists in the database.
+companySettings.archiving|||Archiving...
+companySettings.alreadyArchived|||Already archived
+companySettings.archiveCompany|||Archive company
+companySettings.failedToArchive|||Failed to archive company
+companySettings.membersTitle|||Company Members
+companySettings.membersFocusedNote|||Core keeps this page focused on membership, invite approvals, and safe member removal.
+companySettings.instanceAdminNote|||This account can manage access here through instance-admin privileges, but it does not currently hold an active company membership.
+companySettings.humans|||Humans
+companySettings.humansDescription|||Manage human company memberships and status here.
+companySettings.pendingHumanJoins|||Pending human joins
+companySettings.pendingHumanJoinsDescription|||Review pending join requests before they become active company members.
+companySettings.pendingCount|||{{count}} pending
+companySettings.unknownHumanRequester|||Unknown human requester
+companySettings.noEmailAvailable|||No email available
+companySettings.inviteMetadataUnavailable|||Invite metadata unavailable
+companySettings.submittedAt|||Submitted {{date}}
+companySettings.approveHuman|||Approve human
+companySettings.rejectHuman|||Reject human
+companySettings.userAccount|||User account
+companySettings.unset|||Unset
+companySettings.noUserMemberships|||No user memberships found for this company yet.
+companySettings.editMemberTitle|||Edit member
+companySettings.companyRole|||Company role
+companySettings.membershipStatus|||Membership status
+companySettings.suspended|||Suspended
+companySettings.saveMember|||Save member
+companySettings.savingMember|||Saving…
+companySettings.checkingAssignedTasks|||Checking assigned tasks...
+companySettings.openAssignedTask_one|||{{count}} open assigned task
+companySettings.openAssignedTask_other|||{{count}} open assigned tasks
+companySettings.taskReassignment|||Task reassignment
+companySettings.leaveUnassigned|||Leave unassigned
+companySettings.moreTask_one|||{{count}} more task
+companySettings.moreTask_other|||{{count}} more tasks
+companySettings.memberRemoved|||Member removed
+companySettings.memberRemovedBody_one|||{{count}} assigned task cleaned up.
+companySettings.memberRemovedBody_other|||{{count}} assigned tasks cleaned up.
+companySettings.failedToRemoveMember|||Failed to remove member
+companySettings.memberUpdated|||Member updated
+companySettings.failedToUpdateMember|||Failed to update member
+companySettings.joinRequestApproved|||Join request approved
+companySettings.failedToApproveJoinRequest|||Failed to approve join request
+companySettings.joinRequestRejected|||Join request rejected
+companySettings.failedToRejectJoinRequest|||Failed to reject join request
+companySettings.selectCompanyToManageAccess|||Select a company to manage access.
+companySettings.loadingCompanyAccess|||Loading company access…
+companySettings.noPermissionToManageMembers|||You do not have permission to manage company members.
+companySettings.failedToLoadMembers|||Failed to load company members.
+companySettings.advancedPermissions|||Advanced Permissions
+companySettings.advancedPermissionsDescription|||Advanced access, scoped assignment, and explicit grant controls are provided by installed company settings extensions.
+companySettings.checkingExtensions|||Checking for advanced permission extensions...
+companySettings.advancedPermissionsUnavailable|||Advanced permissions unavailable
+companySettings.advancedPermissionsUnavailableDescription|||Core Paperclip keeps enforcing company boundaries and any existing restrictive policy data, but editing advanced permissions requires an installed extension.
+companySettings.pluginExtensionsUnavailable|||Plugin extensions unavailable: {{error}}
+companySettings.openMembers|||Open Members
+companySettings.openInvites|||Open Invites
+companySettings.thisMember|||this member
+companySettings.selectCompanyForEnvironments|||Select a company context to manage environment secrets and bindings.
+companySettings.enableEnvironmentsHint|||Enable Environments in instance experimental settings to manage shared execution targets.
+companySettings.defaultEnvironment|||Default
+companySettings.localEnvironment|||Local
+companySettings.runsOnHost|||Runs on this Paperclip host.
+companySettings.testConnection|||Test connection
+companySettings.testProvider|||Test provider
+companySettings.editing|||Editing
+companySettings.editEnvironmentTitle|||Edit environment
+companySettings.environmentFormDescription|||Configure a reusable execution target for your agents.
+companySettings.environmentNameHint|||Operator-facing name for this execution target.
+companySettings.environmentDescriptionHint|||Optional note about what this machine is for.
+companySettings.driver|||Driver
+companySettings.driverHint|||Sandbox stores plugin-backed provider config on the shared environment seam. SSH stores a remote machine target.
+companySettings.sandboxDriver|||Sandbox
+companySettings.sshDriver|||SSH
+companySettings.localDriver|||Local
+companySettings.sshHost|||Host
+companySettings.sshHostHint|||DNS name or IP address for the remote machine.
+companySettings.sshPort|||Port
+companySettings.sshPortHint|||Defaults to 22.
+companySettings.sshUsername|||Username
+companySettings.sshUsernameHint|||SSH login user.
+companySettings.sshRemoteWorkspacePath|||Remote workspace path
+companySettings.sshRemoteWorkspacePathHint|||Absolute path that Paperclip will verify during SSH connection tests.
+companySettings.sshPrivateKey|||Private key
+companySettings.sshPrivateKeyHint|||Optional PEM private key. Leave blank to rely on the server's SSH agent or default keychain.
+companySettings.noSavedSecret|||No saved secret
+companySettings.sshKnownHosts|||Known hosts
+companySettings.sshKnownHostsHint|||Optional known_hosts block used when strict host key checking is enabled.
+companySettings.strictHostKeyChecking|||Strict host key checking
+companySettings.strictHostKeyCheckingHint|||Keep this on unless you deliberately want probe-time host key acceptance disabled.
+companySettings.sandboxProvider|||Provider
+companySettings.sandboxProviderHint|||Installed run-capable sandbox provider plugins appear here.
+companySettings.noAdditionalConfigFields|||This provider does not declare additional configuration fields.
+companySettings.environmentVariables|||Environment variables
+companySettings.environmentVariablesHint|||Injected into runs that resolve through this environment. Use plain values or company secrets.
+companySettings.failedToSaveEnvironment|||Failed to save environment
+companySettings.environmentUpdated|||Environment updated
+companySettings.environmentCreated|||Environment created
+companySettings.environmentReady|||{{name}} is ready.
+companySettings.defaultEnvironmentUpdated|||Default environment updated
+companySettings.defaultEnvironmentUpdatedBody|||Agent inheritance now follows the updated instance default.
+companySettings.failedToUpdateDefaultEnvironment|||Failed to update default environment
+companySettings.environmentProbePassed|||Environment probe passed
+companySettings.environmentProbeFailed|||Environment probe failed
+companySettings.draftProbePassed|||Draft probe passed
+companySettings.draftProbeFailed|||Draft probe failed
+companySettings.saveEnvironment|||Save environment
+companySettings.createEnvironment|||Create environment
+companySettings.savingEnvironment|||Saving...
+companySettings.creatingEnvironment|||Creating...
+companySettings.invitesTitle|||Company Invites
+companySettings.invitesDescription|||Invite people to request access to this company. New invite links are copied to your clipboard when they are generated.
+companySettings.inviteAPerson|||Invite a person
+companySettings.inviteAPersonDescription|||Generate a human invite link and choose the default access it should request.
+companySettings.chooseARole|||Choose a role
+companySettings.defaultRole|||Default
+companySettings.roleViewerDescription|||Can view company work and follow along.
+companySettings.roleViewerGets|||View-only company membership.
+companySettings.roleOperator|||Operator
+companySettings.roleOperatorDescription|||Recommended for people who need to help run work without managing access.
+companySettings.roleOperatorGets|||Can assign tasks.
+companySettings.roleAdminDescription|||Recommended for operators who need to invite people, create agents, and approve joins.
+companySettings.roleAdminGets|||Can create agents, invite users, assign tasks, and approve join requests.
+companySettings.roleOwnerDescription|||Full company access, including membership management.
+companySettings.roleOwnerGets|||Everything in Admin, plus managing members.
+companySettings.inviteSingleUseNote|||Each invite link is single-use. Human invitees get the selected role immediately after sign-in; agent invites still create a join request for approval.
+companySettings.creatingInvite|||Creating…
+companySettings.createInvite|||Create invite
+companySettings.inviteHistoryAudit|||Invite history below keeps the audit trail.
+companySettings.latestInviteLink|||Latest invite link
+companySettings.thisUrlIncludesDomain|||This URL includes the current Paperclip domain returned by the server.
+companySettings.latestInviteUrl|||Latest invite URL
+companySettings.copyLink|||Copy link
+companySettings.openInvite|||Open invite
+companySettings.inviteHistory|||Invite history
+companySettings.inviteHistoryDescription|||Review invite status, audience, inviter, and any linked join request.
+companySettings.openJoinRequestQueue|||Open join request queue
+companySettings.noInvitesYet|||No invites have been created for this company yet.
+companySettings.state|||State
+companySettings.invitedFor|||For
+companySettings.invitedBy|||Invited by
+companySettings.joinRequest|||Join request
+companySettings.reviewRequest|||Review request
+companySettings.revoke|||Revoke
+companySettings.loadingMore|||Loading more…
+companySettings.viewMore|||View more
+companySettings.unknownInviter|||Unknown inviter
+companySettings.selectCompanyToManageInvites|||Select a company to manage invites.
+companySettings.loadingInvites|||Loading invites…
+companySettings.noPermissionToManageInvites|||You do not have permission to manage company invites.
+companySettings.failedToLoadInvites|||Failed to load invites.
+companySettings.inviteCreated|||Invite created
+companySettings.inviteCreatedCopied|||Invite ready below and copied to clipboard.
+companySettings.inviteCreatedBody|||Invite ready below.
+companySettings.failedToCreateInvite|||Failed to create invite
+companySettings.inviteRevoked|||Invite revoked
+companySettings.failedToRevokeInvite|||Failed to revoke invite
+companySettings.clipboardUnavailable|||Clipboard unavailable
+companySettings.clipboardUnavailableCopyManually|||The invite URL is selected. Copy it manually from the field.
+companySettings.copyInviteUrlManually|||Copy the invite URL manually from the field below.
+companySettings.exportTitle|||{{companyName}} export
+companySettings.filesSelected_one|||{{selected}} / {{total}} file selected
+companySettings.filesSelected_other|||{{selected}} / {{total}} files selected
+companySettings.warningCount_one|||{{count}} warning
+companySettings.warningCount_other|||{{count}} warnings
+companySettings.buildingExport|||Building export...
+companySettings.packageFiles|||Package files
+companySettings.searchFiles|||Search files...
+companySettings.selectFileToPreview|||Select a file to preview its contents.
+companySettings.binaryAssetPreview|||Binary asset preview is not available for this file type.
+companySettings.selectCompanyToExport|||Select a company to export.
+companySettings.loadingExportData|||Loading export data...
+companySettings.exportFailedBody|||Failed to load export data.
+companySettings.exportDownloaded|||Export downloaded
+companySettings.exportDownloadedBody_one|||{{count}} file exported as {{name}}.zip
+companySettings.exportDownloadedBody_other|||{{count}} files exported as {{name}}.zip
+companySettings.failedToBuildExport|||Failed to build export package.
+companySettings.importSource|||Import source
+companySettings.importSourceDescription|||Choose a GitHub repo or upload a local Paperclip zip package.
+companySettings.githubRepo|||GitHub repo
+companySettings.localZip|||Local zip
+companySettings.chooseZip|||Choose zip
+companySettings.localZipHelpText|||Upload a .zip exported directly from Paperclip. Re-zipped archives created by Finder, Explorer, or other zip tools may not import correctly.
+companySettings.githubUrl|||GitHub URL
+companySettings.githubUrlHint|||Repo tree path or blob URL to COMPANY.md (e.g. github.com/owner/repo/tree/main/company).
+companySettings.githubUrlPlaceholder|||https://github.com/owner/repo/tree/main/company
+companySettings.targetHint|||Import into this company or create a new one.
+companySettings.createNewCompany|||Create new company
+companySettings.existingCompany|||Existing company: {{name}}
+companySettings.newCompanyName|||New company name
+companySettings.newCompanyNameHint|||Optional override. Leave blank to use the package name.
+companySettings.newCompanyNamePlaceholder|||Imported Company
+companySettings.collisionStrategy|||Collision strategy
+companySettings.collisionStrategyHint|||Board imports can rename, skip, or replace matching company content.
+companySettings.renameOnConflict|||Rename on conflict
+companySettings.skipOnConflict|||Skip on conflict
+companySettings.replaceExisting|||Replace existing
+companySettings.previewingImport|||Previewing...
+companySettings.previewImport|||Preview import
+companySettings.importPreview|||Import preview
+companySettings.conflictCount_one|||{{count}} conflict
+companySettings.conflictCount_other|||{{count}} conflicts
+companySettings.errorCount_one|||{{count}} error
+companySettings.errorCount_other|||{{count}} errors
+companySettings.renames|||Renames
+companySettings.renameItemCount_one|||{{count}} item
+companySettings.renameItemCount_other|||{{count}} items
+companySettings.skipAction|||skip
+companySettings.skippedAction|||skipped
+companySettings.confirmRename|||confirm rename
+companySettings.confirmed|||confirmed
+companySettings.agentCount_one|||{{count}} agent
+companySettings.agentCount_other|||{{count}} agents
+companySettings.configureAdapter|||configure adapter
+companySettings.selectCompanyToImport|||Select a company to import into.
+companySettings.previewFailed|||Preview failed
+companySettings.previewFailedBody|||Failed to preview import.
+companySettings.importComplete|||Import complete
+companySettings.importCompleteBody_one|||{{companyName}}: {{count}} agent processed.
+companySettings.importCompleteBody_other|||{{companyName}}: {{count}} agents processed.
+companySettings.importFailedBody|||Failed to apply import.
+companySettings.packageReadFailed|||Package read failed
+companySettings.packageReadFailedBody|||Failed to read folder.
+companySettings.fileWithCount_one|||{{name}} with {{count}} file
+companySettings.fileWithCount_other|||{{name}} with {{count}} files
+companySettings.orgChart|||Org Chart
+companySettings.packagesMoved|||Import and export have moved to dedicated pages accessible from the Org Chart header.
+adapter.packageNamePlaceholder|||my-paperclip-adapter
+secrets.toast.vaultRemovedBody|||{{name}} was removed from Paperclip only.
+secrets.empty.notYetSupported|||Not yet supported.
+secrets.info.howToUseResolve|||Paperclip resolves the value server-side when the run starts and injects it as that env var. Project env applies to every task in the project and overrides agent env on matching keys.
+plugin.installDialog.packageNameLabel|||npm Package Name
+plugin.uninstallDialog.description|||Are you sure you want to uninstall {{name}}? This action cannot be undone.
+plugin.dashboard.pid|||PID
+notFound.breadcrumb|||Not Found
+notFound.companyNotFound|||Company not found
+notFound.pageNotFound|||Page not found
+notFound.noCompanyPrefix|||No company matches prefix "{{prefix}}".
+notFound.routeNotExist|||This route does not exist.
+notFound.requestedPath|||Requested path:
+notFound.openDashboard|||Open dashboard
+myIssues.breadcrumb|||My Tasks
+myIssues.selectCompany|||Select a company to view your tasks.
+myIssues.noTasks|||No tasks assigned to you.
+newAgent.breadcrumbNewAgent|||New Agent
+newAgent.advancedConfig|||Advanced agent configuration
+newAgent.agentName|||Agent name
+newAgent.titlePlaceholder|||Title (e.g. VP of Engineering)
+newAgent.companySkills|||Company skills
+newAgent.optionalSkillsDescription|||Optional skills from the company library. Built-in Paperclip runtime skills are added automatically.
+newAgent.noOptionalSkills|||No optional company skills installed yet.
+newAgent.willBeCEO|||This will be the CEO
+newAgent.testAgent|||Test Agent
+newAgent.createAgent|||Create agent
+boardClaim.invalidUrl|||Invalid board claim URL.
+boardClaim.unavailable|||Claim challenge unavailable
+boardClaim.invalidOrExpired|||Challenge is invalid or expired.
+boardClaim.claimedDescription|||This instance is now linked to your authenticated user.
+boardClaim.openBoard|||Open board
+boardClaim.signInRequired|||Sign in required
+boardClaim.signInDescription|||Sign in or create an account, then return to this page to claim Board ownership.
+boardClaim.signInCreate|||Sign in / Create account
+boardClaim.claimOwnership|||Claim Board ownership
+boardClaim.claimDescription|||This will promote your user to instance admin and migrate company ownership access from local trusted mode.
+boardClaim.claimFailed|||Failed to claim board ownership
+boardClaim.claimButton|||Claim ownership
+chatComposer.dropToAttach|||Drop to attach
+chatComposer.insertedInline|||Inserted inline
+chatComposer.attached|||Attached
+chatComposer.attachFiles|||Attach files
+commentThread.followUp|||Follow-up
+commentThread.queueing|||Queueing…
+commentThread.commentDeleted|||Comment deleted
+commentThread.interrupting|||Interrupting…
+commentThread.interrupt|||Interrupt
+commentThread.leaveAComment|||Leave a comment…
+commentThread.attachImage|||Attach image
+commentThread.assignee|||Assignee
+commentThread.noAssignee|||No assignee
+commentThread.searchAssignees|||Search assignees…
+commentThread.noAssigneesFound|||No assignees found.
+commentThread.posting|||Posting…
+commentThread.noTimelineEntries|||No timeline entries yet.
+commentThread.run|||run
+commentThread.requestedFollowUp|||requested follow-up
+commentThread.updatedThisTask|||updated this task
+commentThread.workspace|||Workspace
+commentThread.unassigned|||Unassigned
+commentThread.timedOut|||timed out
+commentThread.noAssignees|||No assignees
+companySwitcher.selectCompany|||Select company
+companies.newCompany|||New Company
+companies.loading|||Loading companies...
+companies.agents_one|||{{count}} agent
+companies.agents_other|||{{count}} agents
+companies.tasks_one|||{{count}} task
+companies.tasks_other|||{{count}} tasks
+companies.unlimitedBudget|||Unlimited budget
+companies.deleteConfirmMessage|||Delete this company and all its data? This cannot be undone.
+companies.deleting|||Deleting…
+devRestartBanner.justNow|||just now
+devRestartBanner.reasonBackendAndMigrations|||backend files changed and migrations are pending
+devRestartBanner.reasonPendingMigrations|||pending migrations need a fresh boot
+devRestartBanner.reasonBackendChanges|||backend files changed since this server booted
+devRestartBanner.restartRequired|||Restart Required
+devRestartBanner.autoRestartOn|||Auto-Restart On
+devRestartBanner.confirmRestart|||Restart Paperclip now?
+devRestartBanner.failedToRequestRestart|||Failed to request restart
+devRestartBanner.moreItems|||+{{count}} more
+devRestartBanner.autoRestartIdle|||Auto-restart will trigger when the instance is idle
+devRestartBanner.restartManual|||Restart <code>pnpm dev:once</code> after the active work is safe to interrupt
+devRestartBanner.restartRequested|||Restart requested
+devRestartBanner.restartNow|||Restart now
+devRestartBanner.updated|||updated {{time}}
+cloudAccessGate.noCompanyAccess|||No company access
+cloudAccessGate.noCompanyAccessDescription|||This account is signed in, but it does not have an active company membership or instance-admin access on this Paperclip instance.
+cloudAccessGate.useCompanyInvite|||Use a company invite or sign in with an account that already belongs to this org.
+cloudAccessGate.failedToLoadAppState|||Failed to load app state
+bootstrapPending.preferHost|||Prefer to finish setup from the host?
+bootstrapPending.inviteAlreadyActive|||A bootstrap invite is already active. Check your Paperclip startup logs for the first-admin URL, or run this command on the host to rotate it:
+bootstrapPending.runCommandOnHost|||Run this command on the host that runs Paperclip to print a one-time first-admin invite URL:
+bootstrapPending.alreadyClaimed|||Someone else has already claimed this instance.
+bootstrapPending.refreshOrAskAdmin|||Refresh to sign in, or ask the existing admin to invite you from Instance settings -> Access.
+bootstrapPending.sessionExpired|||Your session expired. Sign in again to claim this instance.
+bootstrapPending.serverUnreachable|||We couldn’t reach the server. Try again in a moment.
+bootstrapPending.waitingForAdmin|||This Paperclip is waiting on its first admin
+bootstrapPending.inviteOnlyMode|||This instance runs in invite-only mode. The operator must generate a one-time first-admin invite URL from the host. Once you have the link, open it from this browser to finish setup.
+bootstrapPending.browserClaimDisabled|||Browser-based claim is intentionally disabled in public mode so anyone on the network can’t promote themselves.
+bootstrapPending.youAreAdmin|||You’re the instance admin
+bootstrapPending.continueToDashboard|||Continue to dashboard
+bootstrapPending.finishSetup|||Finish setting up this Paperclip
+bootstrapPending.noAdminYet|||No admin has claimed this instance yet. Sign in or create your Paperclip account to become the first admin from this browser.
+bootstrapPending.claimPrompt|||No admin has claimed this instance yet. Claim it now to become the first admin and start onboarding.
+bootstrapPending.signInOrCreate|||Sign in / Create account
+bootstrapPending.claimInstance|||Claim this instance
+bootstrapPending.claiming|||Claiming…
+bootstrapPending.signedInAs|||Signed in as
+bootstrapPending.wrongAccount|||Wrong account?
+bootstrapPending.switchAccount|||Switch account
+envVarEditor.keyPlaceholder|||KEY
+envVarEditor.plain|||Plain
+envVarEditor.selectSecret|||Select secret…
+envVarEditor.missing|||Missing
+envVarEditor.new|||New
+envVarEditor.createSecretFromPlain|||Create secret from current plain value
+envVarEditor.storeAsSecret|||Store value as secret and replace with reference
+envVarEditor.recentlyUsed|||Recently used:
+envVarEditor.secretName|||Secret name
+envVarEditor.bindingMode|||Binding mode
+envVarEditor.failedToCreateSecret|||Failed to create secret
+envVarEditor.secretBindingsNeedAttention|||{{count}} secret binding{{plural}} need attention:
+envVarEditor.runsWillFail|||Runs will fail until you remap or re-enable.
+executionParticipant.reviewers|||Reviewers
+executionParticipant.approvers|||Approvers
+executionParticipant.searchReviewers|||Search reviewers…
+executionParticipant.searchApprovers|||Search approvers…
+executionParticipant.noReviewers|||No reviewers
+executionParticipant.noApprovers|||No approvers
+executionParticipant.assignToMe|||Assign to me
+executionParticipant.requester|||Requester
+feedCard.review|||Review →
+feedCard.opened|||opened
+feedCard.movedTo|||moved to {{status}}
+feedCard.setPriorityTo|||set priority to {{priority}} on
+feedCard.wroteDocOn|||wrote doc on
+feedCard.editedDocOn|||edited doc on
+feedCard.deletedDocFrom|||deleted doc from
+feedCard.deliveredWorkOn|||delivered work on
+feedCard.updatedWorkOn|||updated work on
+feedCard.removedWorkFrom|||removed work from
+feedCard.pickedUp|||picked up
+feedCard.released|||released
+feedCard.commentedOn|||commented on
+feedCard.attachedFileTo|||attached a file to
+feedCard.removedAttachmentFrom|||removed attachment from
+feedCard.needsApprovalOn|||needs approval on
+feedCard.requestedApprovalOn|||requested approval on
+feedCard.requestedChangesOn|||requested changes on
+feedCard.wantsToHire|||wants to hire
+feedCard.hired|||hired
+feedCard.terminated|||terminated
+feedCard.startedRunOn|||started a run on
+feedCard.cancelledRunOn|||cancelled a run on
+feedCard.createdProject|||created project
+feedCard.updatedProject|||updated project
+feedCard.deletedProject|||deleted project
+feedCard.createdGoal|||created goal
+feedCard.updatedGoal|||updated goal
+feedCard.deletedGoal|||deleted goal
+feedCard.createdCompany|||created company
+feedCard.updatedCompany|||updated company
+feedCard.archivedCompany|||archived company
+feedCard.updatedCompanyBudget|||updated company budget
+feedCard.approval|||approval
+fileTree.noFiles|||No files
+fileTree.filesWillAppear|||Files will appear here when they are available.
+fileTree.files|||Files
+fileTree.kind|||Kind
+fileTree.reportsTo|||Reports to
+fileTree.assignee|||Assignee
+fileTree.project|||Project
+fileTree.recurring|||Recurring
+fileTree.targetDate|||Target date
+fileViewer.somethingWentWrong|||Something went wrong.
+fileViewer.viewerBlocked|||Viewer blocked for this file
+fileViewer.viewerBlockedBody|||This file is not available through the viewer because it may contain sensitive data.
+fileViewer.pathOutsideWorkspace|||Path is outside the workspace
+fileViewer.pathOutsideWorkspaceBody|||The viewer can only open files that live under the issue’s workspace.
+fileViewer.workspaceUnavailable|||Workspace is no longer available
+fileViewer.workspaceUnavailableBody|||The isolated worktree for this issue has been cleaned up, so files cannot be previewed.
+fileViewer.remoteNotSupported|||Remote workspace preview not supported
+fileViewer.remoteNotSupportedBody|||This workspace is hosted remotely and is not available for inline preview yet.
+fileViewer.fileTooLarge|||File is too large to preview
+fileViewer.fileTooLargeBody|||This file exceeds the supported preview size.
+fileViewer.previewNotSupported|||Preview not supported for this file type
+fileViewer.previewNotSupportedBody|||This file does not have a text, image, or video preview available.
+fileViewer.cantPreview|||Can’t preview this file
+fileViewer.cantPreviewBody|||The viewer was unable to load this file.
+fileViewer.imagePreviewUnavailable|||Image preview unavailable
+fileViewer.videoPreviewUnavailable|||Video preview unavailable
+fileViewer.loadingFilePreview|||Loading file preview
+fileViewer.loadingFilePreviewEllipsis|||Loading file preview…
+fileViewer.browseWorkspace|||Browse workspace
+fileViewer.browseDescription|||Search and preview files from this issue’s workspace.
+fileViewer.backToFiles|||Back to files
+fileViewer.copyFileContents|||Copy file contents
+fileViewer.copiedFileContents|||Copied file contents
+fileViewer.copyLink|||Copy link to this file view
+fileViewer.copiedLink|||Copied file view link
+fileViewer.copiedContents|||Copied contents
+fileViewer.copiedFileData|||Copied file data
+fileViewer.fileContentsUnavailable|||File contents unavailable
+fileViewer.closeFileViewer|||Close file viewer
+fileViewer.renderedMarkdown|||Rendered Markdown
+fileViewer.rawMarkdown|||Raw Markdown
+fileViewer.markdownPreviewMode|||Markdown preview mode
+fileViewer.showRenderedMarkdown|||Show rendered Markdown
+fileViewer.showRawMarkdown|||Show raw Markdown
+fileViewer.fileNotFound|||File not found
+fileViewer.fileNotFoundBody|||That file was not found in the active workspace.
+fileViewer.tryProjectWorkspace|||Try project workspace
+fileViewer.noWorkspaceAvailable|||No workspace available
+fileViewer.noWorkspaceAvailableBody|||This issue does not have a workspace that supports preview yet.
+fileViewer.remotePreviewComingSoon|||Remote workspace preview coming soon
+fileViewer.remotePreviewComingSoonBody|||This workspace is hosted remotely; inline previews are not supported yet.
+fileViewer.unableToLoadFile|||Unable to load file.
+fileViewer.unableToLoadFileContent|||Unable to load file content.
+fileViewer.resizeFileTree|||Resize file tree
+auth.signInTitle|||Sign in to Paperclip
+auth.signUpTitle|||Create your Paperclip account
+auth.signInDescription|||Use your email and password to access this instance.
+auth.signUpDescription|||Create an account for this instance. Email confirmation is not required in v1.
+auth.fillRequired|||Please fill in all required fields.
+auth.authenticationFailed|||Authentication failed
+auth.working|||Working…
+auth.signIn|||Sign In
+auth.createAccount|||Create Account
+auth.needAccount|||Need an account?
+auth.alreadyHaveAccount|||Already have an account?
+auth.createOne|||Create one
+auth.signInLink|||Sign in
+cliAuth.invalidUrl|||Invalid CLI auth URL.
+cliAuth.unavailable|||CLI auth challenge unavailable
+cliAuth.invalidOrExpired|||Challenge is invalid or expired.
+cliAuth.cliAccessApproved|||CLI access approved
+cliAuth.approvedDescription|||The Paperclip CLI can now finish authentication on the requesting machine.
+cliAuth.command|||Command
+cliAuth.expired|||CLI auth challenge expired
+cliAuth.cancelled|||CLI auth challenge cancelled
+cliAuth.startAgain|||Start the CLI auth flow again from your terminal to generate a new approval request.
+cliAuth.signInRequired|||Sign in required
+cliAuth.signInDescription|||Sign in or create an account, then return to this page to approve the CLI access request.
+cliAuth.signInCreateAccount|||Sign in / Create account
+cliAuth.approveTitle|||Approve Paperclip CLI access
+cliAuth.approveDescription|||A local Paperclip CLI process is requesting board access to this instance.
+cliAuth.client|||Client
+cliAuth.requestedAccess|||Requested access
+cliAuth.instanceAdmin|||Instance admin
+cliAuth.requestedCompany|||Requested company
+cliAuth.updateFailed|||Failed to update CLI auth challenge
+cliAuth.requiresAdmin|||This challenge requires instance-admin access. Sign in with an instance admin account to approve it.
+cliAuth.approving|||Approving...
+cliAuth.approveButton|||Approve CLI access
+cliAuth.cancelling|||Cancelling...
+org.breadcrumb|||Org Chart
+org.selectCompany|||Select a company to view org chart.
+org.noAgents|||No agents in the organization. Create agents to build your org chart.
+orgChart.breadcrumb|||Org Chart
+orgChart.selectCompany|||Select a company to view the org chart.
+orgChart.noHierarchy|||No organizational hierarchy defined.
+orgChart.importCompany|||Import company
+orgChart.exportCompany|||Export company
+inviteLanding.aCompanyAdmin|||A company admin
+inviteLanding.requestJoin|||Request to join {{company}}
+inviteLanding.awaitingApproval|||Your request is still awaiting approval. {{approver}} must approve your request to join.
+inviteLanding.approvalPage|||Approval page
+inviteLanding.companySettingsMembers|||Company Settings → Members
+inviteLanding.askToVisitPrefix|||Ask them to visit
+inviteLanding.askToVisitSuffix|||to approve your request.
+inviteLanding.refreshAfterApproved|||Refresh this page after you've been approved — you'll be redirected automatically.
+inviteLanding.claimSecret|||Claim secret
+inviteLanding.onboarding|||Onboarding:
+inviteLanding.defaultCompany|||this Paperclip company
+inviteLanding.thisAccount|||this account
+inviteLanding.continue|||Continue
+inviteLanding.openCompany|||Open company
+inviteLanding.acceptInvite|||Accept invite
+inviteLanding.submitRequest|||Submit request
+inviteLanding.invalidToken|||Invalid invite token.
+inviteLanding.loadingInvite|||Loading invite...
+inviteLanding.checkingAccess|||Checking your access...
+inviteLanding.inviteNotAvailable|||Invite not available
+inviteLanding.inviteNotAvailableDesc|||This invite may be expired, revoked, or already used.
+inviteLanding.openingCompany|||Opening company...
+inviteLanding.joinRequestNotApproved|||This join request was not approved.
+inviteLanding.inviteAlreadyUsed|||This invite has already been used.
+inviteLanding.bootstrapComplete|||Bootstrap complete
+inviteLanding.openBoard|||Open board
+inviteLanding.youJoinedCompany|||You joined the company
+inviteLanding.invitedToJoin|||You've been invited to join Paperclip
+inviteLanding.setUpPaperclip|||Set up Paperclip
+inviteLanding.reviewAgentDetails|||Review the invite details, then submit the agent information below to start the join request.
+inviteLanding.createAccountFirst|||Create your Paperclip account first. If you already have one, switch to sign in and continue the invite with the same email.
+inviteLanding.accountReady|||Your account is ready. Review the invite details, then accept it to continue.
+inviteLanding.paperclipBoard|||Paperclip board
+inviteLanding.requestedAccess|||Requested access
+inviteLanding.agentJoinRequest|||Agent join request
+inviteLanding.companyAccess|||Company access
+inviteLanding.inviteExpires|||Invite expires
+inviteLanding.messageFromInviter|||Message from inviter
+inviteLanding.signedInAs|||Signed in as
+inviteLanding.submitAgentDetails|||Submit agent details
+inviteLanding.submitAgentDetailsDesc|||This invite will create an approval request for a new agent in {{company}}.
+inviteLanding.agentName|||Agent name
+inviteLanding.adapterType|||Adapter type
+inviteLanding.comingSoon|||(Coming soon)
+inviteLanding.capabilities|||Capabilities
+inviteLanding.working|||Working...
+inviteLanding.createYourAccount|||Create your account
+inviteLanding.signInToContinue|||Sign in to continue
+inviteLanding.signInDesc|||Use the Paperclip account that already matches this invite. If you do not have one yet, switch back to create account.
+inviteLanding.createAccount|||Create account
+inviteLanding.iAlreadyHaveAccount|||I already have an account
+inviteLanding.pleaseFillRequired|||Please fill in all required fields.
+inviteLanding.email|||Email
+inviteLanding.password|||Password
+inviteLanding.signInAndContinue|||Sign in and continue
+inviteLanding.createAccountAndContinue|||Create account and continue
+inviteLanding.alreadySignedUp|||Already signed up before? Use the existing-account option instead so the invite lands on the right Paperclip user.
+inviteLanding.noAccountYet|||No account yet? Switch back to create account so you can accept the invite with a new login.
+inviteLanding.alreadyInCompany|||Already in this company
+inviteLanding.completingCompanyAccess|||Completing company access
+inviteLanding.acceptBootstrapInvite|||Accept bootstrap invite
+inviteLanding.acceptCompanyInvite|||Accept company invite
+inviteLanding.grantingAccess|||Granting your access to {{company}}.
+inviteLanding.accountBelongs|||This account already belongs to {{company}}.
+inviteLanding.willFinishSetup|||This will finish setting up Paperclip.
+inviteLanding.willGrantAccess|||This will grant or complete your access to {{company}}.
+inviteLanding.submittingRequest|||Submitting request...
+inviteLanding.finishingSignIn|||Finishing sign-in...
+inviteLanding.checkingAccessRetry|||Checking your company access. Try again in a moment.
+inviteLanding.accountAlreadyBelongs|||This account already belongs to the company.
+inviteLanding.failedToAccept|||Failed to accept invite
+teamCatalog.orgChart|||Org Chart
+teamCatalog.searchPlaceholder|||Search teams
+teamCatalog.allKinds|||All kinds
+teamCatalog.allCategories|||All categories
+teamCatalog.anyRisk|||Any risk
+teamCatalog.safeOnly|||Safe only
+teamCatalog.hasWarnings|||Has warnings
+teamCatalog.resetFilters|||Reset filters
+teamCatalog.selectCompany|||Select a company to browse the team catalog.
+teamCatalog.noCatalogConfigured|||No team catalog configured.
+teamCatalog.noTeamsMatchFilter|||No teams match this filter.
+teamCatalog.selectTeam|||Select a team to view details.
+teamCatalog.backToCatalog|||Back to catalog
+teamCatalog.teamInstalled|||Team installed
+teamCatalog.teamImportedToast|||{{name}} was imported.
+teamCatalog.teamImportedDescription|||{{name}} was imported into your company. Imported entities are stamped with catalog provenance.
+teamCatalog.failedToLoad|||Failed to load team catalog.
+teamCatalog.kind|||Kind
+teamCatalog.risk|||Risk
+teamCatalog.installedCount|||Installed · {{count}}
+teamCatalog.optionalCount|||Optional · {{count}}
+teamCatalog.reInstallLatest|||Re-install latest
+teamCatalog.installTeam|||Install team
+teamCatalog.agentHierarchy|||Agent hierarchy
+teamCatalog.requiredSkills|||Required skills
+teamCatalog.files|||Files
+teamCatalog.secretsAndEnvInputs|||Secrets & env inputs
+teamCatalog.externalSources|||External sources
+teamCatalog.noRequiredSkills|||No required skills.
+teamCatalog.noAgentsInTeam|||No agents in this team.
+teamCatalog.updateAvailable|||Update available
+teamCatalog.rootAgent|||root agent
+teamCatalog.stepOf|||Step {{current}} of {{total}}
+teamCatalog.continue|||Continue
+teamCatalog.installWithExecutables|||Install with executables
+teamCatalog.confirmInstallWithExecutables|||Confirm — install with executables
+teamCatalog.installFailed|||Install failed
+teamCatalog.partialStateNotRolledBack|||Partial state is not rolled back. Review the company activity log before retrying.
+teamCatalog.requiredSecretsMissing|||Required secrets missing: {{count}}
+teamCatalog.targetManagerHelp|||This team's root agents need a manager in your company. Pick the agent who will become their parent. Internal team hierarchy is preserved.
+teamCatalog.rootAgents|||Root agents
+teamCatalog.targetManager|||Target manager
+teamCatalog.searchAgents|||Search agents…
+teamCatalog.noAgentsFound|||No agents found.
+teamCatalog.fullCompanyPackage|||Use this team as a full-company package (no target manager)
+teamCatalog.allowExternalSources|||Allow external sources
+teamCatalog.allowExternalSourcesDesc|||Resolve github/url skill and team sources at install time.
+teamCatalog.allowUnpinnedOptionalSources|||Allow unpinned optional sources
+teamCatalog.allowUnpinnedOptionalSourcesDesc|||Permit optional sources that are not pinned to a ref or checksum.
+teamCatalog.allowLocalPathSources|||Allow local-path sources
+teamCatalog.allowLocalPathSourcesDesc|||Required for local_path / agent_package sources. Development use only.
+teamCatalog.localPathSourcesWarning|||This team has local-path sources. Enable "Allow local-path sources" to continue, or install it from the CLI.
+teamCatalog.skillPlanHelp|||Before agents are imported, the catalog resolves the skills they depend on. This is the resolution plan.
+teamCatalog.preparingPreview|||Preparing preview…
+teamCatalog.summary|||Summary
+teamCatalog.collisionStrategy|||Collision strategy
+teamCatalog.renameCollisions|||Rename collisions
+teamCatalog.skipCollisions|||Skip collisions
+teamCatalog.installBlocked|||Install blocked
+teamCatalog.starterTasks|||Starter tasks
+teamCatalog.adapterSelection|||Adapter selection
+teamCatalog.eachAgentDefaults|||Each imported agent defaults to its package adapter; override here before install. Deeper per-adapter model config is editable on the agent after install.
+teamCatalog.installingName|||Installing {{name}}…
+teamCatalog.resolvingSkills|||Resolving skills, importing agents, projects, and routines. This may take a moment.
+teamCatalog.agentsImported|||Agents imported
+teamCatalog.projectsImported|||Projects imported
+teamCatalog.skillsResolved|||Skills resolved
+teamCatalog.viewImportedAgents|||View imported agents →
+teamCatalog.viewImportedProjects|||View imported projects →
+teamCatalog.viewRoutines|||View routines →
+teamCatalog.viewActivityLog|||View activity log →
+teamCatalog.externalSourceWarning|||This team references {{count}} external source(s)
+userProfile.selectCompany|||Select a company to view user profiles.
+userProfile.notFound|||User profile not found for this company.
+userProfile.recentTasks|||Recent tasks
+userProfile.noTouchedTasks|||No touched tasks yet.
+userProfile.recentActivity|||Recent activity
+userProfile.noDirectActions|||No direct user actions recorded yet.
+userProfile.agentAttribution|||Agent attribution
+userProfile.noIssueLinkedUsage|||No issue-linked token usage yet.
+userProfile.providerMix|||Provider mix
+userProfile.noProviderUsage|||No provider usage attributed yet.
+userProfile.taskLinkedUsage|||Task-linked usage
+onboarding.step3Title|||Create your team lead
+onboarding.step4Title|||Connect a model
+onboarding.step3DescPrefix|||Name your lead. They'll help drive
+onboarding.step3DescMiddle|||toward its mission. We default to
+onboarding.step3DefaultName|||Chief of staff
+onboarding.step3DescSuffix|||— rename it to anything you like.
+onboarding.step4Desc|||Pick the adapter and model your lead will run on, then check the environment.
+onboarding.step5Desc|||Everything's set up — your team lead is online and ready to work.
+onboarding.capsuleSlot|||an empty slot for an agent
+onboarding.capsuleConfigured|||your team lead, taking shape
+onboarding.capsuleOnline|||is online and ready to work!
+onboarding.growTitle|||Tell us about your team
+onboarding.growDesc|||We'll use this to set up your lead agent and plan which agents to add.
+onboarding.growWorkLabel|||What does your team work on?
+onboarding.growWorkPlaceholder|||e.g. We create educational YouTube content about AI
+onboarding.growWorkflowsLabel|||What are your current workflows?
+onboarding.growWorkflowsPlaceholder|||e.g. Manual content creation, spreadsheet tracking, email outreach
+onboarding.growPainLabel|||What pain points would you solve with AI?
+onboarding.growPainPlaceholder|||e.g. Can't produce content fast enough, no time for social media
+onboarding.growAutomateLabel|||What would you automate first?
+onboarding.growAutomatePlaceholder|||e.g. Social media scheduling and content repurposing
+onboarding.growGenerateMission|||Generate mission from answers
+onboarding.growGeneratedMission|||Generated mission — edit however you like:
+onboarding.backToStart|||← Back to start
+onboarding.step1Title|||Name your team
+onboarding.step1Desc|||What should we call your team?
+onboarding.teamNameLabel|||Team name
+onboarding.teamNamePlaceholder|||Acme Corp
+onboarding.step2Title|||Define your mission
+onboarding.step2DescPrefix|||Your mission guides everything — your lead agent, who you bring on, and the work
+onboarding.step2DescSuffix|||takes on.
+onboarding.missionPathLabel|||How would you like to define your mission?
+onboarding.missionDirect|||I know my mission
+onboarding.missionDirectHint|||Type it directly
+onboarding.missionQuestionnaire|||Help me figure it out
+onboarding.missionQuestionnaireHint|||Answer a few questions
+onboarding.missionLabel|||Mission
+onboarding.missionPlaceholder|||What is your team trying to achieve?
+onboarding.chipSaas|||Build a SaaS product
+onboarding.chipContent|||Scale a content business
+onboarding.chipMarketplace|||Launch a marketplace
+onboarding.qWorkLabel|||What does your team work on?
+onboarding.qWorkPlaceholder|||e.g. We create educational YouTube content about AI
+onboarding.qServeLabel|||Who do you serve?
+onboarding.qServePlaceholder|||e.g. Non-technical professionals curious about AI tools
+onboarding.qBottleneckLabel|||What's your biggest bottleneck right now?
+onboarding.qBottleneckPlaceholder|||e.g. Can't produce content fast enough across multiple channels
+onboarding.qSuccessLabel|||What would success look like in 6 months?
+onboarding.qSuccessPlaceholder|||e.g. Publishing daily content across 4 platforms with a team of AI agents
+onboarding.generateMission|||Generate my mission
+onboarding.draftMission|||Here's your draft mission — edit it however you like:
+onboarding.backToQuestions|||← Back to questions
+onboarding.missionChangeLater|||You can always change your mission later in settings.
+onboarding.changeTeamName|||← Change team name
+onboarding.adapterType|||Adapter type
+onboarding.moreAdapterTypes|||More Agent Adapter Types
+onboarding.modelLabel|||Model
+onboarding.modelDefault|||Default
+onboarding.selectModelRequired|||Select model (required)
+onboarding.envCheckTitle|||Adapter environment check
+onboarding.envCheckDesc|||Runs a live probe that asks the adapter CLI to respond with hello.
+onboarding.testNow|||Test now
+onboarding.envPassed|||Passed
+onboarding.envWarnings|||Warnings
+onboarding.anthropicKeyHint|||Claude failed while
+onboarding.anthropicKeyHintSuffix|||is set. You can clear it in this adapter config and retry the probe.
+onboarding.retrying|||Retrying...
+onboarding.unsetAnthropicKey|||Unset ANTHROPIC_API_KEY
+onboarding.manualDebug|||Manual debug
+onboarding.debugPrompt|||Prompt:
+onboarding.debugPromptValue|||Respond with hello.
+onboarding.authFailPrefix|||If auth fails, set
+onboarding.authFailMiddle|||in env or run
+onboarding.loginRequired|||If login is required, run
+onboarding.loginRetry|||and retry.
+onboarding.gatewayUrl|||Gateway URL
+onboarding.webhookUrl|||Webhook URL
+onboarding.comingSoon|||Coming soon
+onboarding.noModelsDiscovered|||No models discovered.
+onboarding.checklistTeamName|||Team name
+onboarding.checklistMission|||Mission
+onboarding.checklistAgent|||Agent created
+onboarding.checklistModel|||Model connected
+onboarding.creating|||Creating...
+onboarding.confirmMission|||Confirm mission
+onboarding.bringingToLife|||Bringing to life...
+onboarding.giveHeartbeat|||Give it a heartbeat
+onboarding.hint|||Hint:
+onboardingChat.loading|||Loading conversation...
+onboardingChat.hiringPlanDetected|||Hiring plan detected
+onboardingChat.agentHasPreparedPlan|||{{agentName}} has prepared a hiring plan
+onboardingChat.reviewIt|||Review it, make edits, then approve.
+onboardingChat.reviewPlan|||Review plan
+onboardingChat.askToRevise|||Ask {{agentName}} to revise the plan...
+onboardingChat.messageAgent|||Message {{agentName}}...
+joinRequests.selectCompany|||Select a company to review join requests.
+joinRequests.noPermission|||You do not have permission to review join requests for this company.
+joinRequests.failedToLoad|||Failed to load join requests.
+joinRequests.description|||Review human and agent join requests outside the mixed inbox feed. This queue uses the same approval mutations as the inline inbox cards.
+joinRequests.requestType|||Request type
+joinRequests.pendingApproval|||Pending approval
+joinRequests.human|||Human
+joinRequests.inviteContext|||Invite context
+joinRequests.inviteMetadataUnavailable|||Invite metadata unavailable
+joinRequests.requestDetails|||Request details
+joinRequests.submitted|||Submitted {{date}}
+joinRequests.sourceIp|||Source IP {{ip}}
+joinRequests.unknownHumanRequester|||Unknown human requester
+joinRequests.unknownAgentRequester|||Unknown agent requester
+joinRequests.requestApproved|||Join request approved
+joinRequests.requestRejected|||Join request rejected
+joinRequests.breadcrumbs.joinRequests|||Join Requests

@@ -62,6 +62,7 @@ import { InviteLandingPage } from "./pages/InviteLanding";
 import { JoinRequestQueue } from "./pages/JoinRequestQueue";
 import { NotFoundPage } from "./pages/NotFound";
 import { useCompany } from "./context/CompanyContext";
+import { LanguageProvider } from "./context/LanguageContext";
 import { useDialogActions, useDialogState } from "./context/DialogContext";
 import { loadLastInboxTab } from "./lib/inbox";
 import {
@@ -351,6 +352,7 @@ function NoCompaniesStartPage() {
 
 export function App() {
   return (
+    <LanguageProvider>
     <>
       <Routes>
         <Route path="auth" element={<AuthPage />} />
@@ -405,5 +407,6 @@ export function App() {
       </Routes>
       <OnboardingWizardVariant />
     </>
+    </LanguageProvider>
   );
 }

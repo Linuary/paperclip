@@ -20,6 +20,7 @@ import {
   deriveRecoveryDisplayState,
   type RecoveryDisplayState,
 } from "@/lib/recovery-display";
+import { useTranslation } from "@/i18n";
 
 export type RecoveryCardCardState = RecoveryDisplayState;
 export const deriveRecoveryCardState = deriveRecoveryDisplayState;
@@ -65,6 +66,30 @@ const KIND_HEADLINE: Record<IssueRecoveryActionKind, string> = {
   issue_graph_liveness:
     "Paperclip detected this task lost a live action path. A recovery owner needs to act.",
 };
+
+function kindLabel(kind: IssueRecoveryActionKind, t: ReturnType<typeof useTranslation>["t"]): string {
+  const map: Record<IssueRecoveryActionKind, string> = {
+    missing_disposition: t("issue.recovery.kinds.missingDisposition"),
+    stranded_assigned_issue: t("issue.recovery.kinds.strandedTask"),
+    workspace_validation: t("issue.recovery.kinds.workspaceValidation"),
+    configuration_validation: t("issue.recovery.kinds.configurationValidation"),
+    active_run_watchdog: t("issue.recovery.kinds.activeWatchdog"),
+    issue_graph_liveness: t("issue.recovery.kinds.graphLiveness"),
+  };
+  return map[kind] ?? kind;
+}
+
+function kindHeadline(kind: IssueRecoveryActionKind, t: ReturnType<typeof useTranslation>["t"]): string {
+  const map: Record<IssueRecoveryActionKind, string> = {
+    missing_disposition: t("issue.recovery.headlines.missingDisposition"),
+    stranded_assigned_issue: t("issue.recovery.headlines.strandedTask"),
+    workspace_validation: t("issue.recovery.headlines.workspaceValidation"),
+    configuration_validation: t("issue.recovery.headlines.configurationValidation"),
+    active_run_watchdog: t("issue.recovery.headlines.activeWatchdog"),
+    issue_graph_liveness: t("issue.recovery.headlines.graphLiveness"),
+  };
+  return map[kind] ?? kind;
+}
 
 const STATE_TONE: Record<RecoveryCardCardState, {
   label: string;
@@ -127,6 +152,17 @@ const STATE_TONE: Record<RecoveryCardCardState, {
   },
 };
 
+function stateToneLabel(state: RecoveryCardCardState, t: ReturnType<typeof useTranslation>["t"]): string {
+  const map: Record<RecoveryCardCardState, string> = {
+    needed: t("issue.recovery.states.needed"),
+    in_progress: t("issue.recovery.states.inProgress"),
+    observe_only: t("issue.recovery.states.observeOnly"),
+    escalated: t("issue.recovery.states.escalated"),
+    resolved: t("issue.recovery.states.resolved"),
+  };
+  return map[state];
+}
+
 const OUTCOME_LABEL: Record<IssueRecoveryActionOutcome, string> = {
   restored: "restored",
   delegated: "delegated to follow-up",
@@ -135,6 +171,18 @@ const OUTCOME_LABEL: Record<IssueRecoveryActionOutcome, string> = {
   escalated: "escalated",
   cancelled: "cancelled",
 };
+
+function outcomeLabel(outcome: IssueRecoveryActionOutcome, t: ReturnType<typeof useTranslation>["t"]): string {
+  const map: Record<IssueRecoveryActionOutcome, string> = {
+    restored: t("issue.recovery.outcomes.restored"),
+    delegated: t("issue.recovery.outcomes.delegated"),
+    false_positive: t("issue.recovery.outcomes.falsePositive"),
+    blocked: t("issue.recovery.outcomes.blocked"),
+    escalated: t("issue.recovery.outcomes.escalated"),
+    cancelled: t("issue.recovery.outcomes.cancelled"),
+  };
+  return map[outcome] ?? outcome;
+}
 
 function readEvidenceString(value: unknown): string | null {
   if (typeof value !== "string") return null;
@@ -167,18 +215,18 @@ function readEvidenceRunId(action: IssueRecoveryAction, key: "sourceRunId" | "co
   return next;
 }
 
-function readWakePolicySummary(action: IssueRecoveryAction): string | null {
+function readWakePolicySummary(action: IssueRecoveryAction, t: ReturnType<typeof useTranslation>["t"]): string | null {
   const policy = action.wakePolicy;
   if (!policy) return null;
   const type = readEvidenceString(policy.type);
   if (!type) return null;
-  if (type === "wake_owner") return "Corrective wake queued";
-  if (type === "board_escalation") return "Escalated to board";
-  if (type === "manual") return "Manual";
-  if (type === "manual_repair_required") return "Manual repair required";
+  if (type === "wake_owner") return t("issue.recovery.wakePolicy.correctiveWakeQueued");
+  if (type === "board_escalation") return t("issue.recovery.wakePolicy.escalatedToBoard");
+  if (type === "manual") return t("issue.recovery.wakePolicy.manual");
+  if (type === "manual_repair_required") return t("issue.recovery.wakePolicy.manualRepairRequired");
   if (type === "monitor") {
     const interval = readEvidenceString(policy.intervalLabel);
-    return interval ? `Monitor scheduled · ${interval}` : "Monitor scheduled";
+    return interval ? t("issue.recovery.wakePolicy.monitorScheduledInterval", { interval }) : t("issue.recovery.wakePolicy.monitorScheduled");
   }
   return type.replaceAll("_", " ");
 }
@@ -331,6 +379,28 @@ const RESOLVE_OPTIONS: Array<{
   },
 ];
 
+function resolveOptionLabel(outcome: RecoveryResolveOutcome, t: ReturnType<typeof useTranslation>["t"]): string {
+  const map: Record<RecoveryResolveOutcome, string> = {
+    todo: t("issue.recovery.resolveOptions.tryAgain"),
+    done: t("issue.recovery.resolveOptions.markDone"),
+    in_review: t("issue.recovery.resolveOptions.sendForReview"),
+    false_positive_done: t("issue.recovery.resolveOptions.falsePositiveDone"),
+    false_positive_in_review: t("issue.recovery.resolveOptions.falsePositiveReview"),
+  };
+  return map[outcome] ?? outcome;
+}
+
+function resolveOptionDescription(outcome: RecoveryResolveOutcome, t: ReturnType<typeof useTranslation>["t"]): string {
+  const map: Record<RecoveryResolveOutcome, string> = {
+    todo: t("issue.recovery.resolveOptions.tryAgainDesc"),
+    done: t("issue.recovery.resolveOptions.markDoneDesc"),
+    in_review: t("issue.recovery.resolveOptions.sendForReviewDesc"),
+    false_positive_done: t("issue.recovery.resolveOptions.falsePositiveDoneDesc"),
+    false_positive_in_review: t("issue.recovery.resolveOptions.falsePositiveReviewDesc"),
+  };
+  return map[outcome] ?? outcome;
+}
+
 export function IssueRecoveryActionCard({
   action,
   agentMap,
@@ -339,18 +409,19 @@ export function IssueRecoveryActionCard({
   canFalsePositive = false,
   className,
 }: IssueRecoveryActionCardProps) {
+  const { t } = useTranslation();
   const cardState: RecoveryCardCardState = forcedState ?? deriveRecoveryCardState(action);
   const tone = STATE_TONE[cardState];
   const ToneIcon = tone.Icon;
 
   const headline = useMemo(() => {
     if (cardState === "resolved" && action.outcome) {
-      return `Recovery resolved as ${OUTCOME_LABEL[action.outcome] ?? action.outcome}.`;
+      return t("issue.recovery.resolvedAs", { outcome: outcomeLabel(action.outcome, t) });
     }
-    return KIND_HEADLINE[action.kind] ?? KIND_HEADLINE.missing_disposition;
-  }, [action.kind, action.outcome, cardState]);
+    return kindHeadline(action.kind, t);
+  }, [action.kind, action.outcome, cardState, t]);
 
-  const wakeSummary = readWakePolicySummary(action);
+  const wakeSummary = readWakePolicySummary(action, t);
   const evidenceSummary = pickEvidenceSummary(action);
   const sourceRunId = readEvidenceRunId(action, "sourceRunId") ?? readEvidenceRunId(action, "latestRunId");
   const correctiveRunId = readEvidenceRunId(action, "correctiveRunId");
@@ -375,6 +446,8 @@ export function IssueRecoveryActionCard({
     resolved: "resolved",
   } satisfies Record<RecoveryCardCardState, string>)[cardState];
 
+  const translatedStateLabel = stateToneLabel(cardState, t);
+
   const showResolveActions = onResolve !== undefined && cardState !== "resolved";
   const visibleResolveOptions = RESOLVE_OPTIONS.filter((option) => {
     if (option.boardOnly && !canFalsePositive) return false;
@@ -384,7 +457,7 @@ export function IssueRecoveryActionCard({
   return (
     <section
       role="status"
-      aria-label={`Recovery action: ${ariaState}`}
+      aria-label={t("issue.recovery.title", { state: ariaState })}
       data-recovery-state={cardState}
       data-recovery-kind={action.kind}
       className={cn(
@@ -405,10 +478,10 @@ export function IssueRecoveryActionCard({
         </span>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] font-semibold uppercase tracking-[0.14em]">
-            <span className={tone.labelClass}>{tone.label}</span>
+            <span className={tone.labelClass}>{translatedStateLabel}</span>
             <span className="text-muted-foreground/60" aria-hidden>·</span>
             <code className="rounded bg-background/70 px-1.5 py-0.5 font-mono text-[11px] tracking-normal text-muted-foreground">
-              {KIND_LABEL[action.kind] ?? action.kind}
+              {kindLabel(action.kind, t)}
             </code>
             {updatedAtLabel ? (
               <>
@@ -423,67 +496,67 @@ export function IssueRecoveryActionCard({
         </div>
       </header>
       <dl className={cn("border-t bg-background/40 dark:bg-background/20", tone.divider)}>
-        <MetadataRow label="Owner">
+        <MetadataRow label={t("issue.recovery.owner")}>
           <span className="inline-flex flex-wrap items-center gap-1.5">
             {action.ownerType === "agent" && action.ownerAgentId ? (
               <>
-                <span className="text-muted-foreground">Recovery:</span>
+                <span className="text-muted-foreground">{t("issue.recovery.recovery")}</span>
                 <AgentLink agentId={action.ownerAgentId} agentMap={agentMap} />
               </>
             ) : action.ownerType === "board" ? (
-              <span className="font-medium">Board</span>
+              <span className="font-medium">{t("issue.recovery.board")}</span>
             ) : action.ownerType === "user" && action.ownerUserId ? (
               <span className="font-medium">user {action.ownerUserId.slice(0, 6)}</span>
             ) : action.ownerType === "system" ? (
-              <span className="font-medium">System</span>
+              <span className="font-medium">{t("issue.recovery.system")}</span>
             ) : (
-              <span className="text-muted-foreground">unassigned — pick one to wake them</span>
+              <span className="text-muted-foreground">{t("issue.recovery.unassignedPickOne")}</span>
             )}
             {action.returnOwnerAgentId ? (
               <>
-                <span className="text-muted-foreground">→ Returns to:</span>
+                <span className="text-muted-foreground">{t("issue.recovery.returnsTo")}</span>
                 <AgentLink agentId={action.returnOwnerAgentId} agentMap={agentMap} />
               </>
             ) : null}
           </span>
         </MetadataRow>
-        <MetadataRow label="Source run">
+        <MetadataRow label={t("issue.recovery.sourceRun")}>
           <RunChip runId={sourceRunId} agentId={action.previousOwnerAgentId} />
         </MetadataRow>
         {correctiveRunId ? (
-          <MetadataRow label="Corrective run">
+          <MetadataRow label={t("issue.recovery.correctiveRun")}>
             <RunChip runId={correctiveRunId} agentId={action.previousOwnerAgentId} />
           </MetadataRow>
         ) : null}
-        <MetadataRow label="Evidence">
+        <MetadataRow label={t("issue.recovery.evidence")}>
           {evidenceSummary ? (
             <span className="break-words font-mono text-[11px] text-foreground/80">{evidenceSummary}</span>
           ) : (
             <MissingValue />
           )}
         </MetadataRow>
-        <MetadataRow label="Next action">
+        <MetadataRow label={t("issue.recovery.nextAction")}>
           {action.nextAction ? <span>{action.nextAction}</span> : <MissingValue />}
         </MetadataRow>
-        <MetadataRow label="Wake">
+        <MetadataRow label={t("issue.recovery.wake")}>
           <span className="inline-flex flex-wrap items-center gap-1.5">
             {wakeSummary ? <span>{wakeSummary}</span> : <MissingValue />}
             {showAttempt ? (
               <span className="rounded-md border border-border/50 bg-background/60 px-1.5 py-0.5 text-[11px] text-muted-foreground">
-                attempt {action.attemptCount} of {action.maxAttempts}
+                {t("issue.recovery.attemptOf", { current: action.attemptCount, max: action.maxAttempts })}
               </span>
             ) : null}
             {showTimeoutInline ? (
               <span className="rounded-md border border-border/50 bg-background/60 px-1.5 py-0.5 text-[11px] text-muted-foreground">
-                Times out {formatTimeShort(action.timeoutAt) ?? "soon"}
+                {t("issue.recovery.timesOutSoon")} {formatTimeShort(action.timeoutAt) ?? ""}
               </span>
             ) : null}
           </span>
         </MetadataRow>
         {cardState === "resolved" && action.outcome ? (
-          <MetadataRow label="Resolution">
+          <MetadataRow label={t("issue.recovery.resolution")}>
             <span className={cn("font-medium", tone.labelClass)}>
-              Resolved as {OUTCOME_LABEL[action.outcome]}
+              {t("issue.recovery.resolvedAs", { outcome: outcomeLabel(action.outcome, t) })}
               {action.resolvedAt ? ` · ${formatTimeShort(action.resolvedAt) ?? ""}` : ""}
             </span>
           </MetadataRow>
@@ -498,9 +571,9 @@ export function IssueRecoveryActionCard({
                 size="sm"
                 variant="default"
                 data-testid="recovery-action-resolve-trigger"
-                aria-label="Resolve recovery"
+                aria-label={t("issue.recovery.resolveRecovery")}
               >
-                Resolve…
+                {t("issue.recovery.resolve")}
               </Button>
             </PopoverTrigger>
             <PopoverContent
@@ -509,7 +582,7 @@ export function IssueRecoveryActionCard({
               className="w-72 p-1.5"
             >
               <div className="px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                Resolve recovery
+                {t("issue.recovery.resolveRecovery")}
               </div>
               <div className="flex flex-col">
                 {visibleResolveOptions.map((option) => (
@@ -523,8 +596,8 @@ export function IssueRecoveryActionCard({
                       option.destructive ? "text-destructive" : null,
                     )}
                   >
-                    <span className="font-medium leading-5">{option.label}</span>
-                    <span className="text-[11px] leading-4 text-muted-foreground">{option.description}</span>
+                    <span className="font-medium leading-5">{resolveOptionLabel(option.outcome, t)}</span>
+                    <span className="text-[11px] leading-4 text-muted-foreground">{resolveOptionDescription(option.outcome, t)}</span>
                   </button>
                 ))}
               </div>
@@ -532,11 +605,11 @@ export function IssueRecoveryActionCard({
           </Popover>
           {cardState === "observe_only" ? (
             <span className="text-[11px] text-muted-foreground">
-              Recovery is observing without interrupting the live run.
+              {t("issue.recovery.observingWithoutInterrupting")}
             </span>
           ) : (
             <span className="text-[11px] text-muted-foreground">
-              The card stays open until an explicit decision is recorded.
+              {t("issue.recovery.staysOpenUntilDecision")}
             </span>
           )}
         </div>

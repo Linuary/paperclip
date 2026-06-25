@@ -10,10 +10,19 @@ import { ApprovalPayloadRenderer, approvalLabel } from "./ApprovalPayload";
 
 describe("approvalLabel", () => {
   it("uses payload titles for generic board approvals", () => {
+    const mockT = ((key: string) => {
+      const map: Record<string, string> = {
+        "approvalPayload.typeHireAgent": "Hire Agent",
+        "approvalPayload.typeCeoStrategy": "CEO Strategy",
+        "approvalPayload.typeBudgetOverride": "Budget Override",
+        "approvalPayload.typeBoardApproval": "Board Approval",
+      };
+      return map[key] ?? key;
+    }) as unknown as import("i18next").TFunction;
     expect(
       approvalLabel("request_board_approval", {
         title: "Reply with an ASCII frog",
-      }),
+      }, mockT),
     ).toBe("Board Approval: Reply with an ASCII frog");
   });
 });

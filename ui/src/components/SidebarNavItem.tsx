@@ -3,6 +3,7 @@ import { NavLink } from "@/lib/router";
 import { SIDEBAR_SCROLL_RESET_STATE } from "../lib/navigation-scroll";
 import { cn, SIDEBAR_RAIL_HIDDEN_LABEL } from "../lib/utils";
 import { useSidebar } from "../context/SidebarContext";
+import { useTranslation } from "@/i18n";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import type { LucideIcon } from "lucide-react";
 
@@ -64,6 +65,7 @@ export function SidebarNavItem({
   alert = false,
   liveCount,
 }: SidebarNavItemProps) {
+  const { t } = useTranslation();
   const { isMobile, setSidebarOpen, collapsed, peeking } = useSidebar();
   // A fixed-width contextual pane (SecondarySidebar) forces full labels even
   // when the global app sidebar is collapsed to its rail (PAP-10700).
@@ -81,11 +83,11 @@ export function SidebarNavItem({
   const railAriaLabel = !rail
     ? undefined
     : hasLive
-      ? `${label}, ${liveCount} live`
+      ? t("sidebar.liveAriaLabel", { label, count: liveCount })
       : hasBadge
         ? `${label}, ${badge}${badgeLabel ? ` ${badgeLabel}` : ""}`
         : alert
-          ? `${label}, attention needed`
+          ? t("sidebar.attentionAriaLabel", { label })
           : undefined;
 
   const link = (
@@ -147,7 +149,7 @@ export function SidebarNavItem({
             <span className="animate-pulse absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
             <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
           </span>
-          <span className="text-[11px] font-medium text-blue-600 dark:text-blue-400">{liveCount} live</span>
+          <span className="text-[11px] font-medium text-blue-600 dark:text-blue-400">{t("sidebar.liveCount", { count: liveCount })}</span>
         </span>
       )}
       {!rail && hasBadge && (

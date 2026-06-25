@@ -465,7 +465,7 @@ export function ProjectWorkspaceDetail() {
         ) : (
           <div className="inline-flex items-center gap-2 rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-700 dark:text-emerald-300 sm:max-w-sm">
             <Sparkles className="h-4 w-4" />
-            This is the project’s primary codebase workspace.
+            This is the project's primary codebase workspace.
           </div>
         )}
       </div>

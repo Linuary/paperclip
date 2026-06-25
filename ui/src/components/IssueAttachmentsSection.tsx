@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { IssueAttachment } from "@paperclipai/shared";
 import { Download, ExternalLink, FileText, Paperclip, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "@/i18n";
 import { FoldCurtain } from "./FoldCurtain";
 import { MarkdownBody } from "./MarkdownBody";
 import { OutputFileTile } from "./issue-output/OutputFileTile";
@@ -52,23 +53,24 @@ function AttachmentActions({
   onDelete: (attachmentId: string) => void;
   deletePending?: boolean;
 }) {
+  const { t } = useTranslation();
   const filename = attachmentFilename(attachment);
   return (
     <div className="flex shrink-0 items-center gap-1">
-      <Button asChild variant="ghost" size="icon-sm" title="Open in new tab">
-        <a href={attachmentOpenPath(attachment)} target="_blank" rel="noreferrer" aria-label={`Open ${filename}`}>
+      <Button asChild variant="ghost" size="icon-sm" title={t('issue.attachments.openInNewTab')}>
+        <a href={attachmentOpenPath(attachment)} target="_blank" rel="noreferrer" aria-label={t('issue.attachments.openFile', { filename })}>
           <ExternalLink className="h-4 w-4" />
         </a>
       </Button>
-      <Button asChild variant="ghost" size="icon-sm" title="Download">
-        <a href={attachmentDownloadPath(attachment)} aria-label={`Download ${filename}`}>
+      <Button asChild variant="ghost" size="icon-sm" title={t('common.download')}>
+        <a href={attachmentDownloadPath(attachment)} aria-label={t('issue.attachments.downloadFile', { filename })}>
           <Download className="h-4 w-4" />
         </a>
       </Button>
       <Button
         variant="ghost"
         size="icon-sm"
-        title="Delete attachment"
+        title={t('issue.attachments.deleteAttachment')}
         className="text-muted-foreground hover:text-destructive"
         onClick={() => onDelete(attachment.id)}
         disabled={deletePending}
@@ -80,9 +82,10 @@ function AttachmentActions({
 }
 
 function AttachmentMeta({ attachment }: { attachment: IssueAttachment }) {
+  const { t } = useTranslation();
   return (
     <p className="mt-0.5 text-[11px] text-muted-foreground">
-      Attachment · {attachment.contentType} · {formatBytes(attachment.byteSize)}
+      {t('issue.attachments.attachmentMeta', { type: attachment.contentType, size: formatBytes(attachment.byteSize) })}
     </p>
   );
 }
@@ -96,6 +99,7 @@ function MarkdownAttachmentCard({
   onDelete: (attachmentId: string) => void;
   deletePending?: boolean;
 }) {
+  const { t } = useTranslation();
   const filename = attachmentFilename(attachment);
   const { data, isLoading, error } = useQuery({
     queryKey: queryKeys.issues.attachmentPreview(attachment.id),
@@ -116,9 +120,9 @@ function MarkdownAttachmentCard({
       </div>
       <div className="mt-3 rounded-md hover:bg-accent/10">
         {isLoading ? (
-          <p className="px-1 py-2 text-xs text-muted-foreground">Loading preview...</p>
+          <p className="px-1 py-2 text-xs text-muted-foreground">{t('issue.attachments.loadingPreview')}</p>
         ) : error ? (
-          <p className="px-1 py-2 text-xs text-destructive">Could not load markdown preview.</p>
+          <p className="px-1 py-2 text-xs text-destructive">{t('issue.attachments.markdownPreviewError')}</p>
         ) : (
           <FoldCurtain>
             <MarkdownBody className="paperclip-edit-in-place-content min-h-[220px] text-[15px] leading-7" softBreaks={false}>
@@ -200,6 +204,7 @@ export function IssueAttachmentsSection({
   onDragLeave,
   onDrop,
 }: IssueAttachmentsSectionProps) {
+  const { t } = useTranslation();
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const { imageAttachments, markdownAttachments, videoAttachments, genericAttachments } = useMemo(() => {
     const images: IssueAttachment[] = [];
@@ -242,7 +247,7 @@ export function IssueAttachmentsSection({
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <Paperclip className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
-          <h3 className="text-sm font-medium text-muted-foreground">Attachments</h3>
+          <h3 className="text-sm font-medium text-muted-foreground">{t('issue.attachments.attachments')}</h3>
           <span className="text-xs text-muted-foreground">{attachments.length}</span>
         </div>
         {uploadButton}
@@ -273,7 +278,7 @@ export function IssueAttachmentsSection({
                   className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-black/60"
                   onClick={(event) => event.stopPropagation()}
                 >
-                  <p className="text-xs font-medium text-white">Delete?</p>
+                  <p className="text-xs font-medium text-white">{t('issue.attachments.deleteConfirm')}</p>
                   <div className="flex gap-1.5">
                     <button
                       type="button"
@@ -284,7 +289,7 @@ export function IssueAttachmentsSection({
                       }}
                       disabled={deletePending}
                     >
-                      Yes
+                      {t('common.yes')}
                     </button>
                     <button
                       type="button"
@@ -294,7 +299,7 @@ export function IssueAttachmentsSection({
                         setConfirmDeleteId(null);
                       }}
                     >
-                      No
+                      {t('common.no')}
                     </button>
                   </div>
                 </div>
@@ -306,7 +311,7 @@ export function IssueAttachmentsSection({
                     event.stopPropagation();
                     requestDelete(attachment.id);
                   }}
-                  title="Delete attachment"
+                  title={t('issue.attachments.deleteAttachment')}
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>
@@ -357,13 +362,13 @@ export function IssueAttachmentsSection({
 
       {confirmDeleteId && !imageAttachments.some((attachment) => attachment.id === confirmDeleteId) ? (
         <div className="flex items-center justify-between gap-3 rounded-md border border-destructive/20 bg-destructive/5 px-4 py-3">
-          <p className="text-sm font-medium text-destructive">Delete this attachment? This cannot be undone.</p>
+          <p className="text-sm font-medium text-destructive">{t('issue.attachments.deleteAttachmentConfirm')}</p>
           <div className="flex shrink-0 items-center gap-2">
             <Button variant="ghost" size="sm" onClick={() => setConfirmDeleteId(null)} disabled={deletePending}>
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button variant="destructive" size="sm" onClick={() => confirmDelete(confirmDeleteId)} disabled={deletePending}>
-              {deletePending ? "Deleting..." : "Delete"}
+              {deletePending ? t('issue.attachments.deleting') : t('common.delete')}
             </Button>
           </div>
         </div>

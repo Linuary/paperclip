@@ -4,6 +4,7 @@ import { MarkdownBody } from "./MarkdownBody";
 import { MarkdownEditor, type MarkdownEditorRef, type MentionOption } from "./MarkdownEditor";
 import { useAutosaveIndicator } from "../hooks/useAutosaveIndicator";
 import { FoldCurtain } from "./FoldCurtain";
+import { useTranslation } from "@/i18n";
 
 interface InlineEditorProps {
   value: string;
@@ -48,7 +49,7 @@ export function InlineEditor({
   onSave,
   as: Tag = "span",
   className,
-  placeholder = "Click to edit...",
+  placeholder,
   multiline = false,
   nullable = false,
   imageUploadHandler,
@@ -56,6 +57,8 @@ export function InlineEditor({
   mentions,
   foldable = false,
 }: InlineEditorProps) {
+  const { t } = useTranslation();
+  const effectivePlaceholder = placeholder ?? t("inlineEditor.clickToEdit");
   const [editing, setEditing] = useState(false);
   const [multilineEditing, setMultilineEditing] = useState(false);
   const [multilineFocused, setMultilineFocused] = useState(false);
@@ -283,7 +286,7 @@ export function InlineEditor({
           }}
           role="textbox"
           aria-multiline="true"
-          aria-label={placeholder}
+          aria-label={effectivePlaceholder}
           tabIndex={0}
         >
           {foldable ? (
@@ -330,7 +333,7 @@ export function InlineEditor({
           ref={markdownRef}
           value={draft}
           onChange={setDraft}
-          placeholder={placeholder}
+          placeholder={effectivePlaceholder}
           bordered={false}
           className="bg-transparent"
           contentClassName={cn("paperclip-edit-in-place-content", className)}
@@ -350,12 +353,12 @@ export function InlineEditor({
             )}
           >
             {autosaveState === "saving"
-              ? "Autosaving..."
+              ? t("inlineEditor.autosaving")
               : autosaveState === "saved"
-                ? "Saved"
+                ? t("inlineEditor.saved")
                 : autosaveState === "error"
-                  ? "Could not save"
-                  : "Idle"}
+                  ? t("inlineEditor.couldNotSave")
+                  : t("inlineEditor.idle")}
           </span>
         </div>
       </div>
@@ -400,7 +403,7 @@ export function InlineEditor({
       )}
       onClick={() => setEditing(true)}
     >
-      {value || placeholder}
+      {value || effectivePlaceholder}
     </DisplayTag>
   );
 }

@@ -1,6 +1,7 @@
 import { memo, type ComponentType, type SVGProps } from "react";
 import { Bot, FileText, Hexagon, MessageSquare, Paperclip, Quote } from "lucide-react";
 import type { Agent, CompanySearchResult } from "@paperclipai/shared";
+import { useTranslation } from "@/i18n";
 import { Link } from "@/lib/router";
 import { cn } from "@/lib/utils";
 import { StatusIcon } from "../StatusIcon";
@@ -60,6 +61,7 @@ function SearchResultRowImpl({
   isActive,
   className,
 }: SearchResultRowProps) {
+  const { t } = useTranslation();
   if (result.type === "agent") {
     return (
       <Link
@@ -79,7 +81,7 @@ function SearchResultRowImpl({
               text={result.snippets[0]?.text ?? result.snippet}
               highlights={result.snippets[0]?.highlights}
               field="agent"
-              fallbackLabel={result.sourceLabel ?? "Agent"}
+              fallbackLabel={result.sourceLabel ?? t("searchResultRow.agent")}
             />
           ) : null}
         </div>
@@ -102,7 +104,7 @@ function SearchResultRowImpl({
               text={result.snippets[0]?.text ?? result.snippet}
               highlights={result.snippets[0]?.highlights}
               field="project"
-              fallbackLabel={result.sourceLabel ?? "Project"}
+              fallbackLabel={result.sourceLabel ?? t("searchResultRow.project")}
             />
           ) : null}
         </div>
@@ -114,6 +116,7 @@ function SearchResultRowImpl({
     const artifact = result.artifact;
     if (!artifact) return null;
     const updated = formatRelativeTime(result.updatedAt ?? artifact.updatedAt);
+    const translatedUpdated = updated === "just now" ? t("searchResultRow.justNow") : updated;
     return (
       <Link
         to={result.href}
@@ -134,17 +137,17 @@ function SearchResultRowImpl({
               text={result.snippets[0]?.text ?? result.snippet}
               highlights={result.snippets[0]?.highlights}
               field="artifact"
-              fallbackLabel={result.sourceLabel ?? "Artifact"}
+              fallbackLabel={result.sourceLabel ?? t("searchResultRow.artifact")}
               multiline
             />
           ) : null}
           <div className="mt-1.5 flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground sm:hidden">
             <span className="truncate">{artifact.issueTitle}</span>
-            {updated ? <span className="ml-auto shrink-0 tabular-nums">{updated}</span> : null}
+            {translatedUpdated ? <span className="ml-auto shrink-0 tabular-nums">{translatedUpdated}</span> : null}
           </div>
         </div>
         <div className="ml-2 hidden shrink-0 flex-col items-end gap-2 sm:flex">
-          {updated ? <span className="text-xs tabular-nums text-muted-foreground">{updated}</span> : null}
+          {translatedUpdated ? <span className="text-xs tabular-nums text-muted-foreground">{translatedUpdated}</span> : null}
           {result.previewImageUrl ? (
             <img
               src={result.previewImageUrl}
@@ -165,6 +168,7 @@ function SearchResultRowImpl({
     ? agentsById?.get(issue.assigneeAgentId)?.name ?? null
     : null;
   const updated = formatRelativeTime(result.updatedAt ?? issue.updatedAt);
+  const translatedUpdated = updated === "just now" ? t("searchResultRow.justNow") : updated;
   const titleHighlights = result.snippets.find((snippet) => snippet.field === "title")?.highlights;
   const bodySnippets = result.snippets.filter((snippet) => snippet.field !== "title").slice(0, 2);
   const previewImageUrl = result.previewImageUrl;
@@ -206,7 +210,7 @@ function SearchResultRowImpl({
         {hasRightRail ? (
           <div className="mt-1.5 flex items-center gap-2 text-xs text-muted-foreground sm:hidden">
             {assigneeName ? <span className="truncate">{assigneeName}</span> : null}
-            {updated ? <span className="ml-auto tabular-nums">{updated}</span> : null}
+            {translatedUpdated ? <span className="ml-auto tabular-nums">{translatedUpdated}</span> : null}
           </div>
         ) : null}
       </div>
@@ -215,7 +219,7 @@ function SearchResultRowImpl({
           {assigneeName || updated ? (
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               {assigneeName ? <Identity name={assigneeName} size="sm" /> : null}
-              {updated ? <span className="tabular-nums">{updated}</span> : null}
+              {translatedUpdated ? <span className="tabular-nums">{translatedUpdated}</span> : null}
             </div>
           ) : null}
           {previewImageUrl ? (
@@ -244,7 +248,9 @@ interface SnippetLineProps {
 }
 
 function SnippetLine({ text, highlights, field, fallbackLabel, multiline = false }: SnippetLineProps) {
+  const { t: tSnippet } = useTranslation();
   const { Icon, label } = snippetStyle(field, fallbackLabel);
+  const translatedLabel = SNIPPET_STYLES[field]?.label ? tSnippet(`searchResultRow.${field}`) : label;
   return (
     <div
       className={cn(
@@ -256,7 +262,7 @@ function SnippetLine({ text, highlights, field, fallbackLabel, multiline = false
         className={cn("h-3.5 w-3.5 shrink-0 text-muted-foreground/60", multiline && "mt-0.5")}
         aria-hidden
       />
-      <span className="sr-only">{label}: </span>
+      <span className="sr-only">{translatedLabel}: </span>
       <HighlightedText
         text={text}
         highlights={highlights}

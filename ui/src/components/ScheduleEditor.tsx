@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "@/i18n";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
@@ -200,6 +201,7 @@ export function ScheduleEditor({
   onChange: (cron: string) => void;
   onValidityChange?: (valid: boolean) => void;
 }) {
+  const { t } = useTranslation();
   const parsed = useMemo(() => parseCronToPreset(value), [value]);
   const [preset, setPreset] = useState<SchedulePreset>(parsed.preset);
   const [hour, setHour] = useState(parsed.hour);
@@ -208,6 +210,40 @@ export function ScheduleEditor({
   const [dayOfMonth, setDayOfMonth] = useState(parsed.dayOfMonth);
   const [customCron, setCustomCron] = useState(preset === "custom" ? value : "");
   const customValidation = useMemo(() => getScheduleCronValidation(customCron), [customCron]);
+
+  const presetLabels: Record<SchedulePreset, string> = {
+    every_minute: t("scheduleEditor.presets.everyMinute"),
+    every_hour: t("scheduleEditor.presets.everyHour"),
+    every_day: t("scheduleEditor.presets.everyDay"),
+    weekdays: t("scheduleEditor.presets.weekdays"),
+    weekly: t("scheduleEditor.presets.weekly"),
+    monthly: t("scheduleEditor.presets.monthly"),
+    custom: t("scheduleEditor.presets.custom"),
+  };
+
+  const dayLabels: Record<string, string> = {
+    "1": t("scheduleEditor.dayMon"),
+    "2": t("scheduleEditor.dayTue"),
+    "3": t("scheduleEditor.dayWed"),
+    "4": t("scheduleEditor.dayThu"),
+    "5": t("scheduleEditor.dayFri"),
+    "6": t("scheduleEditor.daySat"),
+    "0": t("scheduleEditor.daySun"),
+  };
+
+  const validationMessages: Record<string, string> = {
+    "Enter a 5-field cron expression.": t("scheduleEditor.validation.enterCron"),
+    "Cron fields must use valid numbers, ranges, lists, wildcards, or steps.": t("scheduleEditor.validation.invalidCron"),
+    "Valid cron.": t("scheduleEditor.validation.validCron"),
+    "Valid cron, but no upcoming fires were found.": t("scheduleEditor.validation.validNoFires"),
+  };
+
+  function resolveValidationMessage(msg: string): string {
+    if (validationMessages[msg]) return validationMessages[msg];
+    const fieldMatch = msg.match(/^Use exactly 5 fields; this has (\d+)\.$/);
+    if (fieldMatch) return t("scheduleEditor.validation.fieldCount", { count: Number(fieldMatch[1]) });
+    return msg;
+  }
 
   useEffect(() => {
     onValidityChange?.(preset !== "custom" || customValidation.valid);
@@ -247,13 +283,13 @@ export function ScheduleEditor({
   return (
     <div className="space-y-3">
       <Select value={preset} onValueChange={(v) => handlePresetChange(v as SchedulePreset)}>
-        <SelectTrigger className="w-full" aria-label="Schedule frequency">
-          <SelectValue placeholder="Choose frequency..." />
+        <SelectTrigger className="w-full" aria-label={t("scheduleEditor.scheduleFrequency")}>
+          <SelectValue placeholder={t("scheduleEditor.chooseFrequency")} />
         </SelectTrigger>
         <SelectContent>
           {PRESETS.map((p) => (
             <SelectItem key={p.value} value={p.value}>
-              {p.label}
+              {presetLabels[p.value]}
             </SelectItem>
           ))}
         </SelectContent>
@@ -276,15 +312,15 @@ export function ScheduleEditor({
             className="font-mono text-sm"
           />
           <p className="text-xs text-muted-foreground">
-            Five fields: minute hour day-of-month month day-of-week
+            {t("scheduleEditor.cronHint")}
           </p>
           <p
             className={customValidation.valid ? "text-xs text-muted-foreground" : "text-xs text-destructive"}
             aria-live="polite"
           >
-            {customValidation.message}
+            {resolveValidationMessage(customValidation.message)}
             {customValidation.valid && customValidation.nextFires.length > 0
-              ? ` Next: ${customValidation.nextFires.map((fire) => fire.toLocaleString()).join(", ")}.`
+              ? ` ${t("scheduleEditor.next")}: ${customValidation.nextFires.map((fire) => fire.toLocaleString()).join(", ")}.`
               : null}
           </p>
         </div>
@@ -292,7 +328,7 @@ export function ScheduleEditor({
         <div className="flex flex-wrap items-center gap-2">
           {preset !== "every_minute" && preset !== "every_hour" && (
             <>
-              <span className="text-sm text-muted-foreground">at</span>
+              <span className="text-sm text-muted-foreground">{t("scheduleEditor.at")}</span>
               <Select
                 value={hour}
                 onValueChange={(h) => {
@@ -335,7 +371,7 @@ export function ScheduleEditor({
 
           {preset === "every_hour" && (
             <>
-              <span className="text-sm text-muted-foreground">at minute</span>
+              <span className="text-sm text-muted-foreground">{t("scheduleEditor.atMinute")}</span>
               <Select
                 value={minute}
                 onValueChange={(m) => {
@@ -359,7 +395,7 @@ export function ScheduleEditor({
 
           {preset === "weekly" && (
             <>
-              <span className="text-sm text-muted-foreground">on</span>
+              <span className="text-sm text-muted-foreground">{t("scheduleEditor.on")}</span>
               <div className="flex gap-1">
                 {DAYS_OF_WEEK.map((d) => (
                   <Button
@@ -373,7 +409,7 @@ export function ScheduleEditor({
                       emitChange(preset, hour, minute, d.value, dayOfMonth, customCron);
                     }}
                   >
-                    {d.label}
+                    {dayLabels[d.value] ?? d.label}
                   </Button>
                 ))}
               </div>
@@ -382,7 +418,7 @@ export function ScheduleEditor({
 
           {preset === "monthly" && (
             <>
-              <span className="text-sm text-muted-foreground">on day</span>
+              <span className="text-sm text-muted-foreground">{t("scheduleEditor.onDay")}</span>
               <Select
                 value={dayOfMonth}
                 onValueChange={(dom) => {

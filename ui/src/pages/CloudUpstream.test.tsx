@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { CloudUpstreamRun, CloudUpstreamsState } from "@paperclipai/shared";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CloudUpstream, buildActivationRows } from "./CloudUpstream";
+import { t } from "@/i18n";
 
 const mockCloudUpstreamsApi = vi.hoisted(() => ({
   list: vi.fn(),
@@ -337,7 +338,7 @@ describe("buildActivationRows", () => {
           },
         },
       },
-    }));
+    }), t);
 
     expect(rows[0]).toMatchObject({ key: "agents", count: 2, status: "activated", statusLabel: "2 activated" });
     expect(rows[2]).toMatchObject({ key: "monitors", count: 0, status: "paused", statusLabel: "0 imported" });

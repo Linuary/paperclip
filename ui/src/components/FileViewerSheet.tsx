@@ -50,6 +50,7 @@ import type {
   WorkspaceFileContent,
   WorkspaceFileSelector,
 } from "@paperclipai/shared";
+import { useTranslation } from "@/i18n";
 
 const FILE_VIEWER_LABELLED_BY_ID = "paperclip-file-viewer-title";
 const FILE_VIEWER_DESCRIBED_BY_ID = "paperclip-file-viewer-description";
@@ -135,54 +136,54 @@ async function copyTextWithFallback(text: string) {
   }
 }
 
-export function describeDenial(code: string, fallback: string): { title: string; body: string; icon: ReactNode } {
+export function describeDenial(code: string, fallback: string, t?: (key: string) => string): { title: string; body: string; icon: ReactNode } {
   const lower = code.toLowerCase();
   if (lower.includes("policy") || lower.includes("denied") || lower.includes("sensitive")) {
     return {
       icon: <Lock aria-hidden="true" className="h-6 w-6 text-amber-500" />,
-      title: "Viewer blocked for this file",
-      body: "This file is not available through the viewer because it may contain sensitive data.",
+      title: t ? t("fileViewer.viewerBlocked") : "Viewer blocked for this file",
+      body: t ? t("fileViewer.viewerBlockedBody") : "This file is not available through the viewer because it may contain sensitive data.",
     };
   }
   if (lower.includes("outside") || lower.includes("traversal")) {
     return {
       icon: <Ban aria-hidden="true" className="h-6 w-6 text-red-500" />,
-      title: "Path is outside the workspace",
-      body: "The viewer can only open files that live under the issue's workspace.",
+      title: t ? t("fileViewer.pathOutsideWorkspace") : "Path is outside the workspace",
+      body: t ? t("fileViewer.pathOutsideWorkspaceBody") : "The viewer can only open files that live under the issue's workspace.",
     };
   }
   if (lower.includes("archive") || lower.includes("cleaned")) {
     return {
       icon: <FolderOpen aria-hidden="true" className="h-6 w-6 text-muted-foreground" />,
-      title: "Workspace is no longer available",
-      body: "The isolated worktree for this issue has been cleaned up, so files cannot be previewed.",
+      title: t ? t("fileViewer.workspaceUnavailable") : "Workspace is no longer available",
+      body: t ? t("fileViewer.workspaceUnavailableBody") : "The isolated worktree for this issue has been cleaned up, so files cannot be previewed.",
     };
   }
   if (lower.includes("remote")) {
     return {
       icon: <AlertTriangle aria-hidden="true" className="h-6 w-6 text-amber-500" />,
-      title: "Remote workspace preview not supported",
-      body: "This workspace is hosted remotely and is not available for inline preview yet.",
+      title: t ? t("fileViewer.remoteNotSupported") : "Remote workspace preview not supported",
+      body: t ? t("fileViewer.remoteNotSupportedBody") : "This workspace is hosted remotely and is not available for inline preview yet.",
     };
   }
   if (lower.includes("too_large") || lower.includes("size")) {
     return {
       icon: <AlertTriangle aria-hidden="true" className="h-6 w-6 text-amber-500" />,
-      title: "File is too large to preview",
-      body: "This file exceeds the supported preview size.",
+      title: t ? t("fileViewer.fileTooLarge") : "File is too large to preview",
+      body: t ? t("fileViewer.fileTooLargeBody") : "This file exceeds the supported preview size.",
     };
   }
   if (lower.includes("binary") || lower.includes("unsupported")) {
     return {
       icon: <AlertTriangle aria-hidden="true" className="h-6 w-6 text-amber-500" />,
-      title: "Preview not supported for this file type",
-      body: "This file does not have a text, image, or video preview available.",
+      title: t ? t("fileViewer.previewNotSupported") : "Preview not supported for this file type",
+      body: t ? t("fileViewer.previewNotSupportedBody") : "This file does not have a text, image, or video preview available.",
     };
   }
   return {
     icon: <Ban aria-hidden="true" className="h-6 w-6 text-red-500" />,
-    title: "Can't preview this file",
-    body: fallback || "The viewer was unable to load this file.",
+    title: t ? t("fileViewer.cantPreview") : "Can't preview this file",
+    body: fallback || (t ? t("fileViewer.cantPreviewBody") : "The viewer was unable to load this file."),
   };
 }
 
@@ -221,6 +222,7 @@ export function FileViewerMetadataRow({
   resolvedResource?: ResolvedWorkspaceResource;
   state: FileViewerUrlState | null;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="flex min-h-[18px] flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
       {resolvedResource ? (
@@ -236,14 +238,13 @@ export function FileViewerMetadataRow({
             <>
               <span aria-hidden="true" className="opacity-50">·</span>
               <span>
-                Line {state.line}
-                {state.column ? `, Col ${state.column}` : ""}
+                {state.column ? t("fileViewer.lineCol", { line: state.line, column: state.column }) : t("fileViewer.line", { line: state.line })}
               </span>
             </>
           ) : null}
         </>
       ) : state ? (
-        <span className="h-3 w-28 rounded bg-muted animate-pulse" aria-label="Loading file details" />
+        <span className="h-3 w-28 rounded bg-muted animate-pulse" aria-label={t("fileViewer.loadingFilePreview")} />
       ) : null}
     </div>
   );
@@ -258,6 +259,7 @@ interface FileContentViewerProps {
 type MarkdownPreviewMode = "raw" | "rendered";
 
 export function FileContentViewer({ content, highlightedLine, onLoaded }: FileContentViewerProps) {
+  const { t } = useTranslation();
   const { resource } = content;
   const isMarkdown = resource.previewKind === "text" && content.content.encoding === "utf8" && isMarkdownResource(resource);
   const [markdownMode, setMarkdownMode] = useState<MarkdownPreviewMode>("rendered");
@@ -277,7 +279,7 @@ export function FileContentViewer({ content, highlightedLine, onLoaded }: FileCo
 
   useEffect(() => {
     if (!lines) return;
-    onLoaded?.(`File loaded, ${lines.length} ${lines.length === 1 ? "line" : "lines"}.`);
+    onLoaded?.(t("fileViewer.fileLoaded_other", { count: lines.length }));
   }, [lines, onLoaded]);
 
   useEffect(() => {
@@ -294,7 +296,7 @@ export function FileContentViewer({ content, highlightedLine, onLoaded }: FileCo
       return (
         <FileViewerStateView
           icon={<AlertTriangle aria-hidden="true" className="h-6 w-6 text-amber-500" />}
-          title="Image preview unavailable"
+          title={t("fileViewer.imagePreviewUnavailable")}
         />
       );
     }
@@ -317,7 +319,7 @@ export function FileContentViewer({ content, highlightedLine, onLoaded }: FileCo
       return (
         <FileViewerStateView
           icon={<AlertTriangle aria-hidden="true" className="h-6 w-6 text-amber-500" />}
-          title="Video preview unavailable"
+          title={t("fileViewer.videoPreviewUnavailable")}
         />
       );
     }
@@ -339,8 +341,8 @@ export function FileContentViewer({ content, highlightedLine, onLoaded }: FileCo
     return (
       <FileViewerStateView
         icon={<AlertTriangle aria-hidden="true" className="h-6 w-6 text-amber-500" />}
-        title="Preview not supported for this file type"
-        body={resource.contentType ? `Content type: ${resource.contentType}` : undefined}
+        title={t("fileViewer.previewNotSupported")}
+        body={resource.contentType ? t("fileViewer.contentType", { type: resource.contentType }) : undefined}
       />
     );
   }
@@ -398,15 +400,15 @@ export function FileContentViewer({ content, highlightedLine, onLoaded }: FileCo
       <div className="absolute right-3 top-3 z-20">
         <div
           role="group"
-          aria-label="Markdown preview mode"
+          aria-label={t("fileViewer.markdownPreviewMode")}
           className="inline-flex rounded-md border border-border bg-background/95 p-0.5 shadow-sm backdrop-blur"
         >
           <Button
             type="button"
             variant={markdownMode === "rendered" ? "secondary" : "ghost"}
             size="icon-sm"
-            aria-label="Show rendered Markdown"
-            title="Rendered Markdown"
+            aria-label={t("fileViewer.showRenderedMarkdown")}
+            title={t("fileViewer.renderedMarkdown")}
             aria-pressed={markdownMode === "rendered"}
             onClick={() => setMarkdownMode("rendered")}
             className={cn(
@@ -420,8 +422,8 @@ export function FileContentViewer({ content, highlightedLine, onLoaded }: FileCo
             type="button"
             variant={markdownMode === "raw" ? "secondary" : "ghost"}
             size="icon-sm"
-            aria-label="Show raw Markdown"
-            title="Raw Markdown"
+            aria-label={t("fileViewer.showRawMarkdown")}
+            title={t("fileViewer.rawMarkdown")}
             aria-pressed={markdownMode === "raw"}
             onClick={() => setMarkdownMode("raw")}
             className={cn(
@@ -458,7 +460,7 @@ function LoadingView({ elapsedMs }: { elapsedMs: number }) {
   if (elapsedMs < 400) {
     return (
       <div className="flex-1 space-y-2 p-6" aria-busy="true" aria-live="polite">
-        <span className="sr-only">Loading file preview</span>
+        <span className="sr-only">{t("fileViewer.loadingFilePreview")}</span>
         {Array.from({ length: 10 }).map((_, index) => (
           <div key={index} className="h-3 rounded bg-muted animate-pulse" style={{ width: `${90 - index * 6}%` }} />
         ))}
@@ -473,7 +475,7 @@ function LoadingView({ elapsedMs }: { elapsedMs: number }) {
     >
       <div className="flex items-center gap-2 text-muted-foreground">
         <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />
-        Loading file preview...
+        {t("fileViewer.loadingFilePreviewEllipsis")}
       </div>
     </div>
   );
@@ -499,6 +501,7 @@ export function FileViewerSheet({
   open: openProp,
   onOpenChange,
 }: FileViewerSheetProps) {
+  const { t } = useTranslation();
   const viewer = useRequiredFileViewer();
   const state = typeof stateProp !== "undefined" ? stateProp : viewer.state;
   // Browse mode: no file selected, but the sheet was opened to browse/search.
@@ -557,14 +560,14 @@ export function FileViewerSheet({
   useEffect(() => {
     if (resolveQuery.isError) {
       const normalized = normalizeError(resolveQuery.error);
-      setAnnouncement(normalized.message || "Unable to load file.");
+      setAnnouncement(normalized.message || t("fileViewer.unableToLoadFile"));
     }
-  }, [resolveQuery.isError, resolveQuery.error]);
+  }, [resolveQuery.isError, resolveQuery.error, t]);
 
   useEffect(() => {
     if (contentQuery.isError) {
       const normalized = normalizeError(contentQuery.error);
-      setAnnouncement(normalized.message || "Unable to load file content.");
+      setAnnouncement(normalized.message || t("fileViewer.unableToLoadFileContent"));
     }
   }, [contentQuery.isError, contentQuery.error]);
 
@@ -646,7 +649,7 @@ export function FileViewerSheet({
       await copyTextWithFallback(value);
       showCopyFeedback(field, message);
     } catch {
-      showCopyFeedback(null, "Copy failed");
+      showCopyFeedback(null, t("common.copyFailed"));
     } finally {
       setCopyingField((current) => (current === field ? null : current));
     }
@@ -661,17 +664,17 @@ export function FileViewerSheet({
         content = result.data;
       }
       if (!content) {
-        showCopyFeedback(null, "File contents unavailable");
+        showCopyFeedback(null, t("fileViewer.fileContentsUnavailable"));
         return;
       }
-      const message = content.content.encoding === "base64" ? "Copied file data" : "Copied contents";
+      const message = content.content.encoding === "base64" ? t("fileViewer.copiedFileData") : t("fileViewer.copiedContents");
       await copyToClipboard(content.content.data, "content", message);
     })();
   }, [canPreview, contentQuery, copyToClipboard, showCopyFeedback, state]);
 
   const handleCopyLink = useCallback(() => {
     if (typeof window === "undefined") return;
-    void copyToClipboard(window.location.href, "link", "Copied link");
+    void copyToClipboard(window.location.href, "link", t("common.linkCopied"));
   }, [copyToClipboard]);
 
   const handleRetry = useCallback(() => {
@@ -710,10 +713,10 @@ export function FileViewerSheet({
     });
   }, []);
 
-  const title = state ? basename(state.path) : "Browse workspace";
+  const title = state ? basename(state.path) : t("fileViewer.browseWorkspace");
   const description = state
     ? middleTruncatePath(state.path)
-    : "Search and preview files from this issue's workspace.";
+    : t("fileViewer.browseDescription");
   const showDescription = state ? description !== title : true;
 
   return (
@@ -764,10 +767,10 @@ export function FileViewerSheet({
                   size="sm"
                   onClick={() => viewer.backToFiles()}
                   className="h-7 gap-1 px-2 text-xs"
-                  aria-label="Back to files"
+                  aria-label={t("fileViewer.backToFiles")}
                 >
                   <ArrowLeft className="h-3.5 w-3.5" />
-                  Back to files
+                  {t("fileViewer.backToFiles")}
                 </Button>
               ) : null}
               {state ? (
@@ -776,8 +779,8 @@ export function FileViewerSheet({
                   variant="ghost"
                   size="icon-sm"
                   onClick={handleCopyContent}
-                  aria-label={copiedField === "content" ? "Copied file contents" : "Copy file contents"}
-                  title={copiedField === "content" ? "Copied contents" : "Copy file contents"}
+                  aria-label={copiedField === "content" ? t("fileViewer.copiedFileContents") : t("fileViewer.copyFileContents")}
+                  title={copiedField === "content" ? t("fileViewer.copiedContents") : t("fileViewer.copyFileContents")}
                   className="h-7 w-7"
                 >
                   {copyingField === "content" ? (
@@ -795,8 +798,8 @@ export function FileViewerSheet({
                   variant="ghost"
                   size="icon-sm"
                   onClick={handleCopyLink}
-                  aria-label={copiedField === "link" ? "Copied file view link" : "Copy link to this file view"}
-                  title={copiedField === "link" ? "Copied link" : "Copy link"}
+                  aria-label={copiedField === "link" ? t("fileViewer.copiedLink") : t("fileViewer.copyLink")}
+                  title={copiedField === "link" ? t("common.linkCopied") : t("fileViewer.copyLink")}
                   className="h-7 w-7"
                 >
                   {copyingField === "link" ? (
@@ -814,8 +817,8 @@ export function FileViewerSheet({
                 size="icon-sm"
                 onClick={() => handleOpenChange(false)}
                 className="h-7 w-7"
-                aria-label="Close file viewer"
-                title="Close"
+                aria-label={t("fileViewer.closeFileViewer")}
+                title={t("common.close")}
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -854,7 +857,7 @@ export function FileViewerSheet({
               <div
                 role="separator"
                 aria-orientation="vertical"
-                aria-label="Resize file tree"
+                aria-label={t("fileViewer.resizeFileTree")}
                 aria-valuemin={MIN_FILE_TREE_WIDTH}
                 aria-valuemax={MAX_FILE_TREE_WIDTH}
                 aria-valuenow={fileTreeWidth}
@@ -928,6 +931,7 @@ function FileViewerBody({
   onSetAnnouncement,
   onFallbackToProject,
 }: FileViewerBodyProps) {
+  const { t } = useTranslation();
   if (resolveQuery.isFetching && !resolveQuery.data) {
     return <LoadingView elapsedMs={elapsedMs} />;
   }
@@ -938,17 +942,17 @@ function FileViewerBody({
       return (
         <FileViewerStateView
           icon={<FileSearch aria-hidden="true" className="h-6 w-6 text-muted-foreground" />}
-          title="File not found"
-          body="That file was not found in the active workspace."
+          title={t("fileViewer.fileNotFound")}
+          body={t("fileViewer.fileNotFoundBody")}
           actions={
             <>
               {onFallbackToProject ? (
                 <Button type="button" variant="secondary" size="sm" onClick={onFallbackToProject}>
-                  Try project workspace
+                  {t("fileViewer.tryProjectWorkspace")}
                 </Button>
               ) : null}
               <Button type="button" variant="ghost" size="sm" onClick={onRetry}>
-                <RefreshCcw aria-hidden="true" className="mr-1 h-3 w-3" /> Retry
+                <RefreshCcw aria-hidden="true" className="mr-1 h-3 w-3" /> {t("common.retry")}
               </Button>
             </>
           }
@@ -959,12 +963,12 @@ function FileViewerBody({
       return (
         <FileViewerStateView
           icon={<FolderOpen aria-hidden="true" className="h-6 w-6 text-muted-foreground" />}
-          title="No workspace available"
-          body="This issue does not have a workspace that supports preview yet."
+          title={t("fileViewer.noWorkspaceAvailable")}
+          body={t("fileViewer.noWorkspaceAvailableBody")}
         />
       );
     }
-    const denial = describeDenial(normalized.code, normalized.message);
+    const denial = describeDenial(normalized.code, normalized.message, t);
     return (
       <FileViewerStateView
         icon={denial.icon}
@@ -972,7 +976,7 @@ function FileViewerBody({
         body={denial.body}
         actions={
           <Button type="button" variant="ghost" size="sm" onClick={onRetry}>
-            <RefreshCcw aria-hidden="true" className="mr-1 h-3 w-3" /> Retry
+            <RefreshCcw aria-hidden="true" className="mr-1 h-3 w-3" /> {t("common.retry")}
           </Button>
         }
       />
@@ -986,14 +990,14 @@ function FileViewerBody({
     return (
       <FileViewerStateView
         icon={<Cloud aria-hidden="true" className="h-6 w-6 text-muted-foreground" />}
-        title="Remote workspace preview coming soon"
-        body="This workspace is hosted remotely; inline previews are not supported yet."
+        title={t("fileViewer.remotePreviewComingSoon")}
+        body={t("fileViewer.remotePreviewComingSoonBody")}
       />
     );
   }
 
   if (!canPreview) {
-    const denial = describeDenial(resource.denialReason ?? "", "");
+    const denial = describeDenial(resource.denialReason ?? "", "", t);
     return <FileViewerStateView icon={denial.icon} title={denial.title} body={denial.body} />;
   }
 
@@ -1003,7 +1007,7 @@ function FileViewerBody({
 
   if (contentQuery.isError) {
     const normalized = normalizeError(contentQuery.error);
-    const denial = describeDenial(normalized.code, normalized.message);
+    const denial = describeDenial(normalized.code, normalized.message, t);
     return (
       <FileViewerStateView
         icon={denial.icon}
@@ -1011,7 +1015,7 @@ function FileViewerBody({
         body={denial.body}
         actions={
           <Button type="button" variant="ghost" size="sm" onClick={onRetry}>
-            <RefreshCcw aria-hidden="true" className="mr-1 h-3 w-3" /> Retry
+            <RefreshCcw aria-hidden="true" className="mr-1 h-3 w-3" /> {t("common.retry")}
           </Button>
         }
       />

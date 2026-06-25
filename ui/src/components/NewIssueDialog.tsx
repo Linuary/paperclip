@@ -72,6 +72,7 @@ import { MarkdownEditor, type MarkdownEditorRef, type MentionOption } from "./Ma
 import { AgentIcon } from "./AgentIconPicker";
 import { InlineEntitySelector, type InlineEntityOption } from "./InlineEntitySelector";
 import { getTrustPreset } from "../lib/trust-policy-ui";
+import { useTranslation, t } from "@/i18n";
 
 const DRAFT_KEY = "paperclip:issue-draft";
 const DEBOUNCE_MS = 800;
@@ -119,27 +120,27 @@ const STAGED_FILE_ACCEPT = "image/*,application/pdf,text/plain,text/markdown,app
 
 const ISSUE_THINKING_EFFORT_OPTIONS = {
   claude_local: [
-    { value: "", label: "Default" },
-    { value: "low", label: "Low" },
-    { value: "medium", label: "Medium" },
-    { value: "high", label: "High" },
+    { value: "", label: t("issue.newDialog.thinkingEffort.default", { defaultValue: "Default" }) },
+    { value: "low", label: t("issue.priority.low", { defaultValue: "Low" }) },
+    { value: "medium", label: t("issue.priority.medium", { defaultValue: "Medium" }) },
+    { value: "high", label: t("issue.priority.high", { defaultValue: "High" }) },
   ],
   codex_local: [
-    { value: "", label: "Default" },
-    { value: "minimal", label: "Minimal" },
-    { value: "low", label: "Low" },
-    { value: "medium", label: "Medium" },
-    { value: "high", label: "High" },
-    { value: "xhigh", label: "X-High" },
+    { value: "", label: t("issue.newDialog.thinkingEffort.default", { defaultValue: "Default" }) },
+    { value: "minimal", label: t("issue.newDialog.thinkingEffort.minimal", { defaultValue: "Minimal" }) },
+    { value: "low", label: t("issue.priority.low", { defaultValue: "Low" }) },
+    { value: "medium", label: t("issue.priority.medium", { defaultValue: "Medium" }) },
+    { value: "high", label: t("issue.priority.high", { defaultValue: "High" }) },
+    { value: "xhigh", label: t("issue.newDialog.thinkingEffort.xhigh", { defaultValue: "X-High" }) },
   ],
   opencode_local: [
-    { value: "", label: "Default" },
-    { value: "minimal", label: "Minimal" },
-    { value: "low", label: "Low" },
-    { value: "medium", label: "Medium" },
-    { value: "high", label: "High" },
-    { value: "xhigh", label: "X-High" },
-    { value: "max", label: "Max" },
+    { value: "", label: t("issue.newDialog.thinkingEffort.default", { defaultValue: "Default" }) },
+    { value: "minimal", label: t("issue.newDialog.thinkingEffort.minimal", { defaultValue: "Minimal" }) },
+    { value: "low", label: t("issue.priority.low", { defaultValue: "Low" }) },
+    { value: "medium", label: t("issue.priority.medium", { defaultValue: "Medium" }) },
+    { value: "high", label: t("issue.priority.high", { defaultValue: "High" }) },
+    { value: "xhigh", label: t("issue.newDialog.thinkingEffort.xhigh", { defaultValue: "X-High" }) },
+    { value: "max", label: t("issue.newDialog.thinkingEffort.max", { defaultValue: "Max" }) },
   ],
 } as const;
 
@@ -223,27 +224,27 @@ function buildStatusOptions(
   return [
     {
       value: "backlog",
-      label: "Backlog",
+      label: t("issue.status.backlog", { defaultValue: "Backlog" }),
       color: palette.backlog ?? issueStatusTextDefault,
-      description: "Parked — assignee will not be woken",
+      description: t("issue.newDialog.backlogDescription", { defaultValue: "Parked — assignee will not be woken" }),
     },
     {
       value: "todo",
-      label: "Todo",
+      label: t("issue.status.todo", { defaultValue: "Todo" }),
       color: palette.todo ?? issueStatusTextDefault,
-      description: "Executable — assignee will be woken",
+      description: t("issue.newDialog.todoDescription", { defaultValue: "Executable — assignee will be woken" }),
     },
-    { value: "in_progress", label: "In Progress", color: palette.in_progress ?? issueStatusTextDefault },
-    { value: "in_review", label: "In Review", color: palette.in_review ?? issueStatusTextDefault },
-    { value: "done", label: "Done", color: palette.done ?? issueStatusTextDefault },
+    { value: "in_progress", label: t("issue.status.inProgress", { defaultValue: "In Progress" }), color: palette.in_progress ?? issueStatusTextDefault },
+    { value: "in_review", label: t("issue.status.inReview", { defaultValue: "In Review" }), color: palette.in_review ?? issueStatusTextDefault },
+    { value: "done", label: t("issue.status.done", { defaultValue: "Done" }), color: palette.done ?? issueStatusTextDefault },
   ];
 }
 
 const priorities = [
-  { value: "critical", label: "Critical", icon: AlertTriangle, color: priorityColor.critical ?? priorityColorDefault },
-  { value: "high", label: "High", icon: ArrowUp, color: priorityColor.high ?? priorityColorDefault },
-  { value: "medium", label: "Medium", icon: Minus, color: priorityColor.medium ?? priorityColorDefault },
-  { value: "low", label: "Low", icon: ArrowDown, color: priorityColor.low ?? priorityColorDefault },
+  { value: "critical", label: t("issue.priority.critical", { defaultValue: "Critical" }), icon: AlertTriangle, color: priorityColor.critical ?? priorityColorDefault },
+  { value: "high", label: t("issue.priority.high", { defaultValue: "High" }), icon: ArrowUp, color: priorityColor.high ?? priorityColorDefault },
+  { value: "medium", label: t("issue.priority.medium", { defaultValue: "Medium" }), icon: Minus, color: priorityColor.medium ?? priorityColorDefault },
+  { value: "low", label: t("issue.priority.low", { defaultValue: "Low" }), icon: ArrowDown, color: priorityColor.low ?? priorityColorDefault },
 ];
 
 const EXECUTION_WORKSPACE_MODES = [
@@ -315,7 +316,7 @@ const IssueTitleTextarea = memo(function IssueTitleTextarea({
   return (
     <textarea
       className="w-full text-lg font-semibold bg-transparent outline-none resize-none overflow-hidden placeholder:text-muted-foreground/50"
-      placeholder="Task title"
+      placeholder={t("issue.newDialog.taskTitlePlaceholder", { defaultValue: "Task title" })}
       rows={1}
       value={draftValue}
       onChange={(e) => {
@@ -383,7 +384,7 @@ const IssueDescriptionEditor = memo(function IssueDescriptionEditor({
         setDraftValue(nextValue);
         onChange(nextValue);
       }}
-      placeholder="Add description..."
+      placeholder={t("issue.newDialog.descriptionPlaceholder", { defaultValue: "Add description..." })}
       bordered={false}
       mentions={mentions}
       contentClassName={cn("text-sm text-muted-foreground pb-12", expanded ? "min-h-[220px]" : "min-h-[120px]")}
@@ -1136,12 +1137,12 @@ export function NewIssueDialog() {
     && !isUsingParentExecutionWorkspace;
   const assigneeOptionsTitle =
     assigneeAdapterType === "claude_local"
-      ? "Claude options"
+      ? t("issue.newDialog.claudeOptions", { defaultValue: "Claude options" })
       : assigneeAdapterType === "codex_local"
-        ? "Codex options"
+        ? t("issue.newDialog.codexOptions", { defaultValue: "Codex options" })
         : assigneeAdapterType === "opencode_local"
-          ? "OpenCode options"
-        : "Agent options";
+          ? t("issue.newDialog.openCodeOptions", { defaultValue: "OpenCode options" })
+        : t("issue.newDialog.agentOptions", { defaultValue: "Agent options" });
   const thinkingEffortOptions =
     assigneeAdapterType === "codex_local"
       ? ISSUE_THINKING_EFFORT_OPTIONS.codex_local
@@ -1344,7 +1345,7 @@ export function NewIssueDialog() {
               </PopoverContent>
             </Popover>
             <span className="text-muted-foreground/60">&rsaquo;</span>
-            <span>{isSubIssueMode ? "New sub-task" : "New task"}</span>
+            <span>{isSubIssueMode ? t("issue.newDialog.newSubTask", { defaultValue: "New sub-task" }) : t("issue.newDialog.newTask", { defaultValue: "New task" })}</span>
           </div>
           <div className="flex items-center gap-1">
             <Button
@@ -1392,11 +1393,11 @@ export function NewIssueDialog() {
                 value={assigneeValue}
                 options={assigneeOptions}
                 recentOptionIds={recentAssigneeOptionIds}
-                placeholder="Assignee"
+                placeholder={t("issue.chat.assignee", { defaultValue: "Assignee" })}
                 disablePortal
-                noneLabel="No assignee"
-                searchPlaceholder="Search assignees..."
-                emptyMessage="No assignees found."
+                noneLabel={t("issue.chat.noAssignee", { defaultValue: "No assignee" })}
+                searchPlaceholder={t("issue.chat.searchAssignees", { defaultValue: "Search assignees..." })}
+                emptyMessage={t("issue.chat.noAssigneesFound", { defaultValue: "No assignees found." })}
                 onChange={(value) => {
                   const nextAssignee = parseAssigneeValue(value);
                   if (nextAssignee.assigneeAgentId) {
@@ -1451,11 +1452,11 @@ export function NewIssueDialog() {
                 value={projectId}
                 options={projectOptions}
                 recentOptionIds={recentProjectIds}
-                placeholder="Project"
+                placeholder={t("issue.newDialog.project", { defaultValue: "Project" })}
                 disablePortal
-                noneLabel="No project"
-                searchPlaceholder="Search projects..."
-                emptyMessage="No projects found."
+                noneLabel={t("issue.newDialog.noProject", { defaultValue: "No project" })}
+                searchPlaceholder={t("issue.newDialog.searchProjects", { defaultValue: "Search projects..." })}
+                emptyMessage={t("issue.newDialog.noProjectsFound", { defaultValue: "No projects found." })}
                 onChange={handleProjectChange}
                 onConfirm={() => {
                   descriptionEditorRef.current?.focus();
@@ -1494,7 +1495,7 @@ export function NewIssueDialog() {
                   <button
                     type="button"
                     className="inline-flex items-center justify-center rounded-md p-1 text-muted-foreground hover:bg-accent/50 transition-colors"
-                    title={taskWatchdogsEnabled ? "Add reviewer, approver, or watchdog" : "Add reviewer or approver"}
+                    title={taskWatchdogsEnabled ? t("issue.newDialog.addReviewerApproverWatchdog", { defaultValue: "Add reviewer, approver, or watchdog" }) : t("issue.newDialog.addReviewerApprover", { defaultValue: "Add reviewer or approver" })}
                   >
                     <MoreHorizontal className="h-4 w-4" />
                   </button>
@@ -1564,11 +1565,11 @@ export function NewIssueDialog() {
                 value={reviewerValue}
                 options={assigneeOptions}
                 recentOptionIds={recentAssigneeOptionIds}
-                placeholder="Reviewer"
+                placeholder={t("issue.newDialog.reviewer", { defaultValue: "Reviewer" })}
                 disablePortal
-                noneLabel="No reviewer"
-                searchPlaceholder="Search reviewers..."
-                emptyMessage="No reviewers found."
+                noneLabel={t("issue.newDialog.noReviewer", { defaultValue: "No reviewer" })}
+                searchPlaceholder={t("issue.newDialog.searchReviewers", { defaultValue: "Search reviewers..." })}
+                emptyMessage={t("issue.newDialog.noReviewersFound", { defaultValue: "No reviewers found." })}
                 onChange={setReviewerValue}
                 renderTriggerValue={(option) =>
                   option ? (
@@ -1609,11 +1610,11 @@ export function NewIssueDialog() {
                 value={approverValue}
                 options={assigneeOptions}
                 recentOptionIds={recentAssigneeOptionIds}
-                placeholder="Approver"
+                placeholder={t("issue.newDialog.approver", { defaultValue: "Approver" })}
                 disablePortal
-                noneLabel="No approver"
-                searchPlaceholder="Search approvers..."
-                emptyMessage="No approvers found."
+                noneLabel={t("issue.newDialog.noApprover", { defaultValue: "No approver" })}
+                searchPlaceholder={t("issue.newDialog.searchApprovers", { defaultValue: "Search approvers..." })}
+                emptyMessage={t("issue.newDialog.noApproversFound", { defaultValue: "No approvers found." })}
                 onChange={setApproverValue}
                 renderTriggerValue={(option) =>
                   option ? (
@@ -1676,10 +1677,10 @@ export function NewIssueDialog() {
                       <InlineEntitySelector
                         value={watchdogAgentId}
                         options={watchdogAgentOptions}
-                        placeholder="Select agent"
-                        noneLabel="No watchdog agent"
-                        searchPlaceholder="Search agents..."
-                        emptyMessage="No agents found."
+                        placeholder={t("issue.newDialog.watchdogSelectAgent", { defaultValue: "Select agent" })}
+                        noneLabel={t("issue.newDialog.watchdogNoAgent", { defaultValue: "No watchdog agent" })}
+                        searchPlaceholder={t("issue.newDialog.watchdogSearchAgents", { defaultValue: "Search agents..." })}
+                        emptyMessage={t("issue.newDialog.watchdogNoAgentsFound", { defaultValue: "No agents found." })}
                         onChange={setWatchdogAgentId}
                         renderTriggerValue={(option) =>
                           option ? (
@@ -1709,7 +1710,7 @@ export function NewIssueDialog() {
                       <Textarea
                         value={watchdogInstructions}
                         onChange={(event) => setWatchdogInstructions(event.target.value)}
-                        placeholder="What should the watchdog watch for and how should it keep work moving?"
+                        placeholder={t("issue.newDialog.watchdogPlaceholder", { defaultValue: "What should the watchdog watch for and how should it keep work moving?" })}
                         rows={4}
                         className="text-xs"
                       />
@@ -1866,9 +1867,9 @@ export function NewIssueDialog() {
                     <InlineEntitySelector
                       value={assigneeModelOverride}
                       options={modelOverrideOptions}
-                      placeholder="Default model"
+                      placeholder={t("issue.newDialog.defaultModel", { defaultValue: "Default model" })}
                       disablePortal
-                      noneLabel="Default model"
+                      noneLabel={t("issue.newDialog.defaultModel", { defaultValue: "Default model" })}
                       searchPlaceholder="Search models..."
                       emptyMessage="No models found."
                       onChange={setAssigneeModelOverride}
