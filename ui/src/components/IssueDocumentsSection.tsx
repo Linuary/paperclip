@@ -21,7 +21,7 @@ import { queryKeys } from "../lib/queryKeys";
 import { cn, relativeTime } from "../lib/utils";
 import { FoldCurtain } from "./FoldCurtain";
 import { DocumentAnnotationsCountChip, IssueDocumentAnnotations } from "./IssueDocumentAnnotations";
-import { MarkdownBody } from "./MarkdownBody";
+import { MarkdownBody, type MarkdownExternalReferenceMap } from "./MarkdownBody";
 import { MarkdownEditor, type MentionOption } from "./MarkdownEditor";
 import { OutputFeedbackButtons } from "./OutputFeedbackButtons";
 import { Button } from "@/components/ui/button";
@@ -76,10 +76,16 @@ function saveFoldedDocumentKeys(issueId: string, keys: string[]) {
   window.localStorage.setItem(getFoldedDocumentsStorageKey(issueId), JSON.stringify(keys));
 }
 
-function renderFoldableBody(body: string, className?: string) {
+function renderFoldableBody(
+  body: string,
+  className?: string,
+  externalReferences?: MarkdownExternalReferenceMap,
+) {
   return (
     <FoldCurtain>
-      <MarkdownBody className={className} softBreaks={false}>{body}</MarkdownBody>
+      <MarkdownBody className={className} softBreaks={false} externalReferences={externalReferences}>
+        {body}
+      </MarkdownBody>
     </FoldCurtain>
   );
 }
@@ -162,6 +168,7 @@ export function IssueDocumentsSection({
   defaultAnnotationPanelOpenKeys,
   defaultAnnotationFocusedThreadIds,
   forceEditDocumentKey,
+  externalReferences,
 }: {
   issue: Issue;
   canDeleteDocuments: boolean;
@@ -188,6 +195,7 @@ export function IssueDocumentsSection({
   defaultAnnotationFocusedThreadIds?: Readonly<Record<string, string>>;
   /** Force a doc into edit mode on mount (Storybook-only). */
   forceEditDocumentKey?: string | null;
+  externalReferences?: MarkdownExternalReferenceMap;
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -757,6 +765,7 @@ export function IssueDocumentsSection({
   }, [autosaveState, commitDraft, documentConflict, draft, markDocumentDirty, resetAutosaveState, sortedDocuments]);
 
   const documentBodyShellClassName = "mt-3";
+  const documentBodyPaddingClassName = "";
   const documentBodyContentClassName = "paperclip-edit-in-place-content min-h-[220px] text-[15px] leading-7";
   const toggleFoldedDocument = (key: string) => {
     setFoldedDocumentKeys((current) =>
@@ -880,7 +889,9 @@ export function IssueDocumentsSection({
               PLAN
             </span>
           </div>
-          {renderFoldableBody(issue.legacyPlanDocument.body, documentBodyContentClassName)}
+          <div className={documentBodyPaddingClassName}>
+            {renderFoldableBody(issue.legacyPlanDocument.body, documentBodyContentClassName, externalReferences)}
+          </div>
         </div>
       ) : null}
 
@@ -1199,7 +1210,7 @@ export function IssueDocumentsSection({
                           {!isPlanKey(doc.key) && activeConflict.serverDocument.title ? (
                             <p className="mb-2 text-sm font-medium">{activeConflict.serverDocument.title}</p>
                           ) : null}
-                          {renderFoldableBody(activeConflict.serverDocument.body, "text-[14px] leading-7")}
+                          {renderFoldableBody(activeConflict.serverDocument.body, "text-[14px] leading-7", externalReferences)}
                         </div>
                       )}
                     </div>
@@ -1237,7 +1248,7 @@ export function IssueDocumentsSection({
                       defaultFocusedThreadId={defaultAnnotationFocusedThreadIds?.[doc.key]}
                     >
                       {isHistoricalPreview ? (
-                        renderFoldableBody(displayedBody, documentBodyContentClassName)
+                        renderFoldableBody(displayedBody, documentBodyContentClassName, externalReferences)
                       ) : activeDraft ? (
                         <MarkdownEditor
                           value={displayedBody}
@@ -1259,7 +1270,7 @@ export function IssueDocumentsSection({
                           onSubmit={() => void commitDraft(activeDraft ?? draft, { clearAfterSave: false, trackAutosave: true })}
                         />
                       ) : (
-                        renderFoldableBody(displayedBody, documentBodyContentClassName)
+                        renderFoldableBody(displayedBody, documentBodyContentClassName, externalReferences)
                       )}
                     </IssueDocumentAnnotations>
                   </div>

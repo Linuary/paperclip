@@ -22,7 +22,9 @@ import { queryKeys } from "../lib/queryKeys";
 import { cn, projectRouteRef, SIDEBAR_RAIL_HIDDEN_LABEL } from "../lib/utils";
 import { useProjectOrder } from "../hooks/useProjectOrder";
 import { resourceMembershipState, useResourceMembershipMutation, useResourceMemberships } from "../hooks/useResourceMemberships";
+import { useProjectExternalObjectSummary } from "../hooks/useIssueExternalObjects";
 import { BudgetSidebarMarker } from "./BudgetSidebarMarker";
+import { ExternalObjectStatusSummary } from "./ExternalObjectStatusSummary";
 import { ProjectTile } from "./ProjectTile";
 import { SidebarSection, type SidebarSectionRadioChoice } from "./SidebarSection";
 import { Button } from "@/components/ui/button";
@@ -119,6 +121,7 @@ function ProjectItem({
 }: ProjectItemProps) {
   const { t } = useTranslation();
   const routeRef = projectRouteRef(project);
+  const { summary: externalObjectsSummary } = useProjectExternalObjectSummary(project.id);
 
   const link = (
     <NavLink
@@ -140,7 +143,8 @@ function ProjectItem({
     >
       <ProjectTile color={project.color ?? null} icon={project.icon ?? null} size="xs" />
       <span className={rail ? SIDEBAR_RAIL_HIDDEN_LABEL : "flex-1 truncate"}>{project.name}</span>
-      {!rail && project.pauseReason === "budget" ? <BudgetSidebarMarker title={t("sidebar.projectPausedByBudget")} /> : null}
+      {!rail ? <ExternalObjectStatusSummary summary={externalObjectsSummary} compact /> : null}
+      {!rail && project.pauseReason === "budget" ? <BudgetSidebarMarker title="Project paused by budget" /> : null}
     </NavLink>
   );
 

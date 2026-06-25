@@ -22,7 +22,7 @@ import {
   type SuggestedTaskTreeNode,
 } from "../lib/issue-thread-interactions";
 import { cn, formatDateTime, formatShortDate } from "../lib/utils";
-import { MarkdownBody } from "./MarkdownBody";
+import { MarkdownBody, type MarkdownExternalReferenceMap } from "./MarkdownBody";
 import { Button } from "./ui/button";
 import { Checkbox } from "./ui/checkbox";
 import { PriorityIcon } from "./PriorityIcon";
@@ -59,6 +59,7 @@ interface IssueThreadInteractionCardProps {
     interaction: AskUserQuestionsInteraction,
   ) => Promise<void> | void;
   onUploadImage?: (file: File) => Promise<string>;
+  externalReferences?: MarkdownExternalReferenceMap;
 }
 
 function resolveActorLabel(args: {
@@ -707,6 +708,7 @@ function AskUserQuestionsCard({
   interaction,
   onSubmitInteractionAnswers,
   onCancelInteraction,
+  externalReferences,
 }: {
   interaction: AskUserQuestionsInteraction;
   onSubmitInteractionAnswers?: (
@@ -716,6 +718,7 @@ function AskUserQuestionsCard({
   onCancelInteraction?: (
     interaction: AskUserQuestionsInteraction,
   ) => Promise<void> | void;
+  externalReferences?: MarkdownExternalReferenceMap;
 }) {
   const [draftAnswers, setDraftAnswers] = useState<Record<string, string[]>>(() =>
     Object.fromEntries(
@@ -1014,7 +1017,7 @@ function AskUserQuestionsCard({
               <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-700">
                 Submitted summary
               </div>
-              <MarkdownBody>{interaction.result.summaryMarkdown}</MarkdownBody>
+              <MarkdownBody externalReferences={externalReferences}>{interaction.result.summaryMarkdown}</MarkdownBody>
             </div>
           ) : null}
         </div>
@@ -1174,6 +1177,7 @@ function RequestConfirmationCard({
   onAcceptInteraction,
   onRejectInteraction,
   onUploadImage,
+  externalReferences,
 }: {
   interaction: RequestConfirmationInteraction;
   isPlan?: boolean;
@@ -1185,6 +1189,7 @@ function RequestConfirmationCard({
     reason?: string,
   ) => Promise<void> | void;
   onUploadImage?: (file: File) => Promise<string>;
+  externalReferences?: MarkdownExternalReferenceMap;
 }) {
   const [rejecting, setRejecting] = useState(false);
   const [working, setWorking] = useState<"accept" | "reject" | null>(null);
@@ -1284,7 +1289,7 @@ function RequestConfirmationCard({
           </div>
           {interaction.payload.detailsMarkdown ? (
             <div className="border-t border-border/60 pt-3 text-sm">
-              <MarkdownBody>{interaction.payload.detailsMarkdown}</MarkdownBody>
+              <MarkdownBody externalReferences={externalReferences}>{interaction.payload.detailsMarkdown}</MarkdownBody>
             </div>
           ) : null}
           <RequestConfirmationTargetChip
@@ -1576,6 +1581,7 @@ function RequestCheckboxConfirmationCard({
   interaction,
   onAcceptInteraction,
   onRejectInteraction,
+  externalReferences,
 }: {
   interaction: RequestCheckboxConfirmationInteraction;
   onAcceptInteraction?: (
@@ -1587,6 +1593,7 @@ function RequestCheckboxConfirmationCard({
     interaction: RequestCheckboxConfirmationInteraction,
     reason?: string,
   ) => Promise<void> | void;
+  externalReferences?: MarkdownExternalReferenceMap;
 }) {
   const options = interaction.payload.options;
   const optionIds = useMemo(() => options.map((option) => option.id), [options]);
@@ -1722,7 +1729,7 @@ function RequestCheckboxConfirmationCard({
         <div className="text-sm leading-6 text-foreground">{interaction.payload.prompt}</div>
         {interaction.payload.detailsMarkdown ? (
           <div className="border-t border-border/60 pt-3 text-sm">
-            <MarkdownBody>{interaction.payload.detailsMarkdown}</MarkdownBody>
+            <MarkdownBody externalReferences={externalReferences}>{interaction.payload.detailsMarkdown}</MarkdownBody>
           </div>
         ) : null}
         <RequestConfirmationTargetChip
@@ -1882,6 +1889,7 @@ export function IssueThreadInteractionCard({
   onSubmitInteractionAnswers,
   onCancelInteraction,
   onUploadImage,
+  externalReferences,
 }: IssueThreadInteractionCardProps) {
   const { t } = useTranslation();
   const isPlan = isPlanConfirmation(interaction);
@@ -1975,12 +1983,14 @@ export function IssueThreadInteractionCard({
             interaction={interaction}
             onSubmitInteractionAnswers={onSubmitInteractionAnswers}
             onCancelInteraction={onCancelInteraction}
+            externalReferences={externalReferences}
           />
         ) : interaction.kind === "request_checkbox_confirmation" ? (
           <RequestCheckboxConfirmationCard
             interaction={interaction}
             onAcceptInteraction={onAcceptInteraction}
             onRejectInteraction={onRejectInteraction}
+            externalReferences={externalReferences}
           />
         ) : (
           <RequestConfirmationCard
@@ -1989,6 +1999,7 @@ export function IssueThreadInteractionCard({
             onAcceptInteraction={onAcceptInteraction}
             onRejectInteraction={onRejectInteraction}
             onUploadImage={onUploadImage}
+            externalReferences={externalReferences}
           />
         )}
       </div>

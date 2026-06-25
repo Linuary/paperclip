@@ -51,6 +51,7 @@ import { copyTextToClipboard } from "../lib/clipboard";
 import {
   buildIssueChatMessages,
   formatDurationWords,
+  isCoTSegmentActive,
   stabilizeThreadMessages,
   type IssueChatComment,
   type IssueChatLinkedRun,
@@ -101,7 +102,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MarkdownBody } from "./MarkdownBody";
+import { MarkdownBody, type MarkdownExternalReferenceMap } from "./MarkdownBody";
 import { WorkspaceFileMarkdownBody } from "./WorkspaceFileMarkdownBody";
 import { MarkdownEditor, type MentionOption, type MarkdownEditorRef } from "./MarkdownEditor";
 import { Identity } from "./Identity";
@@ -218,6 +219,7 @@ interface IssueChatMessageContext {
   onUploadImage?: (file: File) => Promise<string>;
   issueStatus?: string;
   successfulRunHandoff?: SuccessfulRunHandoffState | null;
+  externalReferences?: MarkdownExternalReferenceMap;
 }
 
 const IssueChatCtx = createContext<IssueChatMessageContext>({
@@ -451,6 +453,7 @@ interface IssueChatThreadProps {
    * comment is in the loaded set before we scroll to it.
    */
   onRefreshLatestComments?: () => Promise<unknown> | void;
+  externalReferences?: MarkdownExternalReferenceMap;
 }
 
 type IssueChatErrorBoundaryProps = {
@@ -458,6 +461,7 @@ type IssueChatErrorBoundaryProps = {
   messages: readonly ThreadMessage[];
   emptyMessage: string;
   variant: "full" | "embedded";
+  externalReferences?: MarkdownExternalReferenceMap;
   children: ReactNode;
 };
 
@@ -492,6 +496,7 @@ class IssueChatErrorBoundary extends Component<IssueChatErrorBoundaryProps, Issu
           messages={this.props.messages}
           emptyMessage={this.props.emptyMessage}
           variant={this.props.variant}
+          externalReferences={this.props.externalReferences}
         />
       );
     }
@@ -557,10 +562,12 @@ function IssueChatFallbackThread({
   messages,
   emptyMessage,
   variant,
+  externalReferences,
 }: {
   messages: readonly ThreadMessage[];
   emptyMessage: string;
   variant: "full" | "embedded";
+  externalReferences?: MarkdownExternalReferenceMap;
 }) {
   const { t } = useTranslation();
   return (
@@ -602,7 +609,9 @@ function IssueChatFallbackThread({
                 </div>
                 <div className="space-y-2">
                   {lines.length > 0 ? lines.map((line, index) => (
-                    <MarkdownBody key={`${message.id}:fallback:${index}`}>{line}</MarkdownBody>
+                    <MarkdownBody key={`${message.id}:fallback:${index}`} externalReferences={externalReferences}>
+                      {line}
+                    </MarkdownBody>
                   )) : (
                     <p className="text-sm text-muted-foreground">{t("issue.chat.noMessageContent")}</p>
                   )}
@@ -708,7 +717,7 @@ function commentDateLabel(date: Date | string | undefined): string {
 }
 
 const IssueChatTextPart = memo(function IssueChatTextPart({ text, recessed, onAccent }: { text: string; recessed?: boolean; onAccent?: boolean }) {
-  const { onImageClick } = useContext(IssueChatCtx);
+  const { onImageClick, externalReferences } = useContext(IssueChatCtx);
   if (isSuccessfulRunHandoffComment(text)) {
     return <SuccessfulRunHandoffCommentCallout text={text} recessed={recessed} onImageClick={onImageClick} />;
   }
@@ -720,6 +729,7 @@ const IssueChatTextPart = memo(function IssueChatTextPart({ text, recessed, onAc
       style={recessed ? { opacity: 0.55 } : undefined}
       softBreaks
       onImageClick={onImageClick}
+      externalReferences={externalReferences}
     >
       {text}
     </WorkspaceFileMarkdownBody>
@@ -865,13 +875,16 @@ function IssueChatChainOfThought({
     (p): p is ToolCallMessagePart => p.type === "tool-call",
   );
 
-  const isActive = isMessageRunning;
-  const [expanded, setExpanded] = useState(isActive);
-
   const rawSegments = Array.isArray(custom.chainOfThoughtSegments)
     ? (custom.chainOfThoughtSegments as SegmentTiming[])
     : [];
   const segmentTiming = myIndex >= 0 ? rawSegments[myIndex] ?? null : null;
+  const isActive = isCoTSegmentActive({
+    isMessageRunning,
+    segmentIndex: myIndex,
+    segmentCount: rawSegments.length,
+  });
+  const [expanded, setExpanded] = useState(isActive);
   const liveElapsed = useLiveElapsed(segmentTiming?.startMs, isActive);
 
   useEffect(() => {
@@ -2119,6 +2132,7 @@ function ExpiredRequestConfirmationActivity({
     onRejectInteraction,
     onCancelInteraction,
     onUploadImage,
+    externalReferences,
   } = useContext(IssueChatCtx);
   const [expanded, setExpanded] = useState(false);
   const hasResolvedActor = Boolean(interaction.resolvedByAgentId || interaction.resolvedByUserId);
@@ -2199,6 +2213,7 @@ function ExpiredRequestConfirmationActivity({
             onRejectInteraction={onRejectInteraction}
             onCancelInteraction={onCancelInteraction}
             onUploadImage={onUploadImage}
+            externalReferences={externalReferences}
           />
         </div>
       ) : null}
@@ -2630,6 +2645,7 @@ function IssueChatSystemMessage({ message }: { message: ThreadMessage }) {
     onSubmitInteractionAnswers,
     onCancelInteraction,
     onUploadImage,
+    externalReferences,
   } = useContext(IssueChatCtx);
   const custom = message.metadata.custom as Record<string, unknown>;
   const anchorId = typeof custom.anchorId === "string" ? custom.anchorId : undefined;
@@ -2687,6 +2703,7 @@ function IssueChatSystemMessage({ message }: { message: ThreadMessage }) {
             onSubmitInteractionAnswers={onSubmitInteractionAnswers}
             onCancelInteraction={onCancelInteraction}
             onUploadImage={onUploadImage}
+            externalReferences={externalReferences}
           />
         </div>
       </div>
@@ -2938,6 +2955,18 @@ type SimpleVirtualItem = {
   size: number;
 };
 
+export function getVirtualizedMeasurementScrollAdjustment(args: {
+  itemStart: number;
+  previousSize: number;
+  nextSize: number;
+  viewportStart: number;
+}) {
+  const { itemStart, previousSize, nextSize, viewportStart } = args;
+  const previousEnd = itemStart + previousSize;
+  if (previousEnd > viewportStart) return 0;
+  return nextSize - previousSize;
+}
+
 function useIssueThreadVirtualizer({
   count,
   estimateSize,
@@ -3052,7 +3081,20 @@ function useIssueThreadVirtualizer({
       const key = getItemKey(index);
       const previousSize = measuredSizeByKeyRef.current.get(key) ?? estimatedSize;
       if (Math.abs(previousSize - measuredSize) < 1) return;
+      const scrollAdjustment = getVirtualizedMeasurementScrollAdjustment({
+        itemStart: itemStarts[index] ?? scrollMargin,
+        previousSize,
+        nextSize: measuredSize,
+        viewportStart: Math.max(scrollMargin, scrollOffset()),
+      });
       measuredSizeByKeyRef.current.set(key, measuredSize);
+      if (Math.abs(scrollAdjustment) >= 1) {
+        if (mode.kind === "window") {
+          window.scrollBy({ top: scrollAdjustment, behavior: "auto" });
+        } else {
+          mode.element.scrollBy({ top: scrollAdjustment, behavior: "auto" });
+        }
+      }
       rerender((value) => value + 1);
     },
   };
@@ -3745,7 +3787,13 @@ const IssueChatComposer = forwardRef<IssueChatComposerHandle, IssueChatComposerP
   const PendingWorkModeIcon = pendingWorkModeMeta.icon;
 
   function handleComposerKeyDown(evt: ReactKeyboardEvent<HTMLDivElement>) {
-    if (!(evt.metaKey || evt.ctrlKey) || evt.code !== "Period") return;
+    // Match the period via both `code` and `key`: iOS Safari with a hardware
+    // keyboard often leaves `code` empty for cmd-period, so relying on it alone
+    // lets the event fall through and triggers Safari's default cancel/dismiss
+    // (which closes the view). Catching `key === "."` keeps the shortcut working
+    // on iOS while preserving desktop behavior.
+    const isPeriod = evt.code === "Period" || evt.key === ".";
+    if (!(evt.metaKey || evt.ctrlKey) || !isPeriod) return;
     evt.preventDefault();
     setPendingWorkMode((current) => nextWorkMode(current, true));
   }
@@ -4105,6 +4153,7 @@ export function IssueChatThread({
   assigneeUserId = null,
   onResumeFromBacklog,
   resumeFromBacklogPending = false,
+  externalReferences,
 }: IssueChatThreadProps) {
   const { t } = useTranslation();
   const location = useLocation();
@@ -4630,6 +4679,7 @@ export function IssueChatThread({
       onUploadImage: stableOnUploadImage,
       issueStatus,
       successfulRunHandoff,
+      externalReferences,
     }),
     [
       feedbackDataSharingPreference,
@@ -4655,6 +4705,7 @@ export function IssueChatThread({
       stableOnUploadImage,
       issueStatus,
       successfulRunHandoff,
+      externalReferences,
     ],
   );
 
@@ -4692,6 +4743,7 @@ export function IssueChatThread({
           messages={messages}
           emptyMessage={resolvedEmptyMessage}
           variant={variant}
+          externalReferences={externalReferences}
         >
           <div data-testid="thread-root">
             <div

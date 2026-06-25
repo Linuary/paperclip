@@ -190,6 +190,57 @@ export const issueStatusColor: Record<string, BrandChipColor> = {
 export const issueStatusColorDefault: BrandChipColor = "gray";
 
 // ---------------------------------------------------------------------------
+// Status → base-hue CSS variable
+//
+// Each status chip / icon sets a local `--sc` to the matching var below, and
+// the `.status-chip` / `.status-fill` helpers (index.css) derive the rendered
+// fill/text/border from it for both light and dark. Agent and task keep
+// independent vars so each can be tuned without touching the other, even where
+// their defaults coincide.
+// ---------------------------------------------------------------------------
+
+/** Agent status → base-hue CSS var. `active` aliases idle (never assigned). */
+export const agentStatusVar: Record<string, string> = {
+  idle: "--status-agent-idle",
+  active: "--status-agent-idle",
+  running: "--status-agent-running",
+  paused: "--status-agent-paused",
+  error: "--status-agent-error",
+};
+export const agentStatusVarDefault = "--status-agent-idle";
+
+/** Task/issue status → base-hue CSS var (drives both the chip and the icon). */
+export const taskStatusVar: Record<string, string> = {
+  backlog: "--status-task-backlog",
+  todo: "--status-task-todo",
+  in_progress: "--status-task-in_progress",
+  in_review: "--status-task-in_review",
+  done: "--status-task-done",
+  blocked: "--status-task-blocked",
+  cancelled: "--status-task-cancelled",
+};
+export const taskStatusVarDefault = "--status-task-backlog";
+
+/**
+ * Task/issue status → AA-tuned ICON-hue CSS var (PAP-238). Drives the standalone
+ * {@link StatusGlyph} colour. Separate from {@link taskStatusVar} (the chip base
+ * hue) because a bare glyph next to text needs a stronger hue to clear WCAG 3:1;
+ * see the `--status-task-icon-*` block in `index.css`. `in_queue` is the blocked
+ * shape recoloured blue, so it maps to its own var.
+ */
+export const taskStatusIconVar: Record<string, string> = {
+  backlog: "--status-task-icon-backlog",
+  todo: "--status-task-icon-todo",
+  in_progress: "--status-task-icon-in_progress",
+  in_review: "--status-task-icon-in_review",
+  done: "--status-task-icon-done",
+  blocked: "--status-task-icon-blocked",
+  cancelled: "--status-task-icon-cancelled",
+  in_queue: "--status-task-icon-in_queue",
+};
+export const taskStatusIconVarDefault = "--status-task-icon-backlog";
+
+// ---------------------------------------------------------------------------
 // Agent status dot — solid background for small indicator dots
 // ---------------------------------------------------------------------------
 
@@ -217,3 +268,86 @@ export const priorityColor: Record<string, string> = {
 };
 
 export const priorityColorDefault = "text-yellow-600 dark:text-yellow-400";
+
+// ---------------------------------------------------------------------------
+// External object status — colors & severity ranking
+// ---------------------------------------------------------------------------
+//
+// Categories come from `EXTERNAL_OBJECT_STATUS_CATEGORIES` in @paperclipai/shared.
+// The map keys here intentionally mirror the union — keep them in sync.
+//
+// Tone reuse rationale (see UX spec §1):
+//   unknown   → backlog hue (muted, dashed circle)
+//   open      → todo / blue
+//   waiting   → amber (distinct from internal in_progress yellow)
+//   running   → cyan, animated when motion is allowed
+//   succeeded → done / green
+//   failed    → red
+//   blocked   → red
+//   closed    → muted neutral
+//   archived  → muted neutral
+//   auth_required → amber + dashed
+//   unreachable   → red + dashed
+
+export const externalObjectStatusIcon: Record<string, string> = {
+  unknown: "text-muted-foreground border-muted-foreground",
+  open: "text-blue-600 border-blue-600 dark:text-blue-400 dark:border-blue-400",
+  waiting: "text-amber-600 border-amber-600 dark:text-amber-400 dark:border-amber-400",
+  running: "text-cyan-600 border-cyan-600 dark:text-cyan-400 dark:border-cyan-400",
+  succeeded: "text-green-600 border-green-600 dark:text-green-400 dark:border-green-400",
+  failed: "text-red-600 border-red-600 dark:text-red-400 dark:border-red-400",
+  blocked: "text-red-600 border-red-600 dark:text-red-400 dark:border-red-400",
+  closed: "text-neutral-500 border-neutral-500",
+  archived: "text-neutral-500 border-neutral-500",
+  auth_required: "text-amber-600 border-amber-600 dark:text-amber-400 dark:border-amber-400",
+  unreachable: "text-red-600 border-red-600 dark:text-red-400 dark:border-red-400",
+};
+
+export const externalObjectStatusIconDefault = "text-muted-foreground border-muted-foreground";
+
+export const externalObjectStatusBadge: Record<string, string> = {
+  unknown: "bg-muted text-muted-foreground",
+  open: "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300",
+  waiting: "bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300",
+  running: "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/50 dark:text-cyan-300",
+  succeeded: "bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300",
+  failed: "bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300",
+  blocked: "bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300",
+  closed: "bg-muted text-muted-foreground",
+  archived: "bg-muted text-muted-foreground",
+  auth_required: "bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300",
+  unreachable: "bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300",
+};
+
+export const externalObjectStatusBadgeDefault = "bg-muted text-muted-foreground";
+
+/**
+ * Liveness overlay applied on top of the base status tone. We deliberately
+ * encode it as utility classes (not a tone change) so callers can append the
+ * overlay to any pill, icon, or marker without redefining colors.
+ *
+ * The dashed border + reduced opacity guarantees a non-color differentiator
+ * for stale / auth_required / unreachable per WCAG 1.4.1.
+ */
+export const externalObjectLivenessOverlay: Record<string, string> = {
+  unknown: "",
+  fresh: "",
+  stale: "opacity-70 [border-style:dashed]",
+  auth_required: "[border-style:dashed]",
+  unreachable: "[border-style:dashed]",
+};
+
+/**
+ * Severity ranking used by sidebar/list rollups. Higher number = more
+ * attention-worthy. Anything ≤ `muted` should be hidden when summarising.
+ */
+export const externalObjectStatusToneSeverity: Record<string, number> = {
+  muted: 0,
+  neutral: 1,
+  success: 2,
+  info: 3,
+  warning: 4,
+  danger: 5,
+};
+
+export const externalObjectStatusToneSeverityDefault = 0;

@@ -62,6 +62,7 @@ import { copyTextToClipboard } from "../lib/clipboard";
 import {
   buildIssueChatMessages,
   formatDurationWords,
+  isCoTSegmentActive,
   stabilizeThreadMessages,
   type IssueChatComment,
   type IssueChatLinkedRun,
@@ -852,13 +853,16 @@ function IssueChatChainOfThought({
     (p): p is ToolCallMessagePart => p.type === "tool-call",
   );
 
-  const isActive = isMessageRunning;
-  const [expanded, setExpanded] = useState(isActive);
-
   const rawSegments = Array.isArray(custom.chainOfThoughtSegments)
     ? (custom.chainOfThoughtSegments as SegmentTiming[])
     : [];
   const segmentTiming = myIndex >= 0 ? rawSegments[myIndex] ?? null : null;
+  const isActive = isCoTSegmentActive({
+    isMessageRunning,
+    segmentIndex: myIndex,
+    segmentCount: rawSegments.length,
+  });
+  const [expanded, setExpanded] = useState(isActive);
   const liveElapsed = useLiveElapsed(segmentTiming?.startMs, isActive);
 
   useEffect(() => {
@@ -3589,7 +3593,13 @@ const IssueChatComposer = forwardRef<IssueChatComposerHandle, IssueChatComposerP
   const PendingWorkModeIcon = pendingWorkModeMeta.icon;
 
   function handleComposerKeyDown(evt: ReactKeyboardEvent<HTMLDivElement>) {
-    if (!(evt.metaKey || evt.ctrlKey) || evt.code !== "Period") return;
+    // Match the period via both `code` and `key`: iOS Safari with a hardware
+    // keyboard often leaves `code` empty for cmd-period, so relying on it alone
+    // lets the event fall through and triggers Safari's default cancel/dismiss
+    // (which closes the view). Catching `key === "."` keeps the shortcut working
+    // on iOS while preserving desktop behavior.
+    const isPeriod = evt.code === "Period" || evt.key === ".";
+    if (!(evt.metaKey || evt.ctrlKey) || !isPeriod) return;
     evt.preventDefault();
     setPendingWorkMode((current) => nextWorkMode(current, false));
   }
