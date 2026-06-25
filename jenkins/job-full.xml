@@ -116,115 +116,22 @@ BETTER_AUTH_SECRET=paperclip-dev-secret</defaultValue>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
-  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps">
-    <script>
-pipeline {
-    agent any
-
-    environment {
-        TAG = "${params.BRANCH}-${params.TARGET_ENV}-${env.BUILD_NUMBER}"
-    }
-
-    stages {
-        stage('Checkout') {
-            steps {
-                checkout([
-                    $class: 'GitSCM',
-                    branches: [[name: params.BRANCH]],
-                    userRemoteConfigs: [[url: params.GIT_URL, credentialsId: 'github-credentials']]
-                ])
-            }
-        }
-
-        stage('Detect') {
-            steps {
-                script {
-                    env.DETECTED_TYPE = params.PROJECT_TYPE
-                    env.IS_LOCAL = (params.TARGET_HOST == 'localhost' || params.TARGET_HOST == '127.0.0.1') ? 'true' : 'false'
-                    env.IS_K8S = (params.DEPLOY_METHOD == 'kubernetes') ? 'true' : 'false'
-                    if (params.IMAGE_NAME) {
-                        env.FINAL_IMAGE_NAME = params.IMAGE_NAME
-                    } else {
-                        def repoName = params.GIT_URL.split('/').last().replace('.git', '')
-                        env.FINAL_IMAGE_NAME = repoName
-                    }
-                    echo "Type: ${env.DETECTED_TYPE}, Image: ${env.FINAL_IMAGE_NAME}:${TAG}"
-                }
-            }
-        }
-
-        stage('Build') {
-            when { expression { params.ACTION in ['build', 'build+deploy'] } }
-            steps {
-                script {
-                    def buildArgs = ''
-                    if (params.BUILD_ARGS) {
-                        buildArgs = params.BUILD_ARGS.split(',').collect { "--build-arg ${it.trim()}" }.join(' ')
-                    }
-                    sh "docker build -f ${params.DOCKERFILE} ${buildArgs} -t ${FINAL_IMAGE_NAME}:${TAG} ."
-
-                    def envContent = params.ENV_VARS ?: ''
-                    if (params.SECRET_VARS) {
-                        envContent += '\n' + params.SECRET_VARS
-                    }
-                    writeFile file: '.env', text: envContent.trim()
-
-                    if (!env.IS_LOCAL.toBoolean() &amp;&amp; !env.IS_K8S.toBoolean()) {
-                        sh "docker save ${FINAL_IMAGE_NAME}:${TAG} | gzip > image.tar.gz"
-                    }
-                }
-            }
-        }
-
-        stage('Deploy') {
-            when { expression { params.ACTION in ['deploy', 'build+deploy'] } }
-            steps {
-                script {
-                    if (env.IS_K8S.toBoolean()) {
-                        sh "kubectl set image deployment/${env.FINAL_IMAGE_NAME} ${env.FINAL_IMAGE_NAME}=${FINAL_IMAGE_NAME}:${TAG} -n default"
-                    } else if (env.IS_LOCAL.toBoolean()) {
-                        sh 'docker compose -f jenkins/docker/docker-compose.deploy.yml --profile combined --env-file .env up -d'
-                    } else {
-                        withCredentials([sshUserPrivateKey(credentialsId: 'deploy-ssh-key', keyFileVariable: 'SSH_KEY')]) {
-                            sh "scp -o StrictHostKeyChecking=no -i ${SSH_KEY} -P ${params.TARGET_PORT} jenkins/docker/docker-compose.deploy.yml .env image.tar.gz ${params.TARGET_USER}@${params.TARGET_HOST}:/opt/app/"
-                            sh "ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} -p ${params.TARGET_PORT} ${params.TARGET_USER}@${params.TARGET_HOST} 'cd /opt/app &amp;&amp; gunzip -c image.tar.gz | docker load &amp;&amp; docker compose -f docker-compose.deploy.yml --profile combined up -d'"
-                        }
-                    }
-                }
-            }
-        }
-
-        stage('Health Check') {
-            when { expression { params.ACTION != 'build' } }
-            steps {
-                script {
-                    def port = '8088'
-                    if (params.ENV_VARS?.contains('PORT=')) {
-                        def portLine = params.ENV_VARS.readLines().find { it.startsWith('PORT=') }
-                        if (portLine) port = portLine.split('=')[1].trim()
-                    }
-                    sh """
-                        for i in \$(seq 1 30); do
-                            if curl -sf http://${params.TARGET_HOST}:${port}/api/health; then
-                                echo "Health check passed!"
-                                exit 0
-                            fi
-                            sleep 2
-                        done
-                        echo "Health check timeout (non-fatal)"
-                    """
-                }
-            }
-        }
-    }
-
-    post {
-        always { cleanWs() }
-        success { echo "Pipeline completed successfully!" }
-        failure { echo "Pipeline failed!" }
-    }
-}
-    </script>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition" plugin="workflow-cps">
+    <scriptPath>jenkins/Jenkinsfile</scriptPath>
+    <scm class="hudson.plugins.git.GitSCM" plugin="git">
+      <configVersion>2</configVersion>
+      <userRemoteConfigs>
+        <hudson.plugins.git.UserRemoteConfig>
+          <url>https://github.com/Linuary/paperclip.git</url>
+          <credentialsId>github-credentials</credentialsId>
+        </hudson.plugins.git.UserRemoteConfig>
+      </userRemoteConfigs>
+      <branches>
+        <hudson.plugins.git.BranchSpec>
+          <name>*/dev-custom</name>
+        </hudson.plugins.git.BranchSpec>
+      </branches>
+    </scm>
     <sandbox>true</sandbox>
   </definition>
   <triggers/>
