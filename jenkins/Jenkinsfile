@@ -88,21 +88,12 @@ pipeline {
                         }
                     }
 
-                    // 检测目标主机是否为本机
-                    def localIPs = sh(script: "hostname -I 2>/dev/null || echo ''", returnStdout: true).trim().split()
-                    if (localIPs.contains(params.TARGET_HOST)) {
-                        env.IS_LOCAL_HOST = 'true'
-                    } else {
-                        env.IS_LOCAL_HOST = 'false'
-                    }
-
                     echo "========================================"
                     echo "Project Type: ${env.DETECTED_TYPE}"
                     echo "Image Name:   ${env.FINAL_IMAGE_NAME}:${TAG}"
                     echo "Target Env:   ${params.TARGET_ENV}"
                     echo "Deploy Method: ${params.DEPLOY_METHOD}"
                     echo "Target Host:  ${params.TARGET_HOST}"
-                    echo "Is Local:     ${env.IS_LOCAL_HOST}"
                     echo "========================================"
                 }
             }
@@ -189,7 +180,6 @@ pipeline {
             steps {
                 script {
                     if (IS_K8S.toBoolean()) {
-                        // Kubernetes 部署
                         sh """
                             kubectl set image deployment/${env.FINAL_IMAGE_NAME} \
                                 ${env.FINAL_IMAGE_NAME}=${FINAL_IMAGE_NAME}:${TAG} \
@@ -197,40 +187,48 @@ pipeline {
                             kubectl rollout status deployment/${env.FINAL_IMAGE_NAME} \
                                 -n ${params.K8S_NAMESPACE} --timeout=300s
                         """
-                    } else if (env.IS_LOCAL_HOST == 'true') {
-                        // 本地部署
-                        sh 'docker compose -f jenkins/docker/docker-compose.deploy.yml --profile combined --env-file .env up -d'
                     } else {
-                        // 远程 SSH 部署
-                        withCredentials([sshUserPrivateKey(
-                            credentialsId: 'ssh-deploy-key',
-                            keyFileVariable: 'SSH_KEY',
-                            usernameVariable: 'SSH_USER'
-                        )]) {
-                            // 传输文件到远程
-                            sh """
-                                scp -i ${SSH_KEY} -P ${params.TARGET_PORT} \
-                                    jenkins/docker/docker-compose.deploy.yml .env \
-                                    ${params.TARGET_USER}@${params.TARGET_HOST}:/opt/app/
-                            """
+                        // 先测试 SSH 连通性，不通则回退到本地部署
+                        def sshReachable = false
+                        try {
+                            sh "ssh -o ConnectTimeout=3 -o BatchMode=yes -p ${params.TARGET_PORT} ${params.TARGET_USER}@${params.TARGET_HOST} echo ok"
+                            sshReachable = true
+                        } catch (e) {
+                            echo "SSH to ${params.TARGET_HOST} unreachable, falling back to local deploy"
+                        }
 
-                            if (!params.PUSH_REGISTRY) {
+                        if (sshReachable) {
+                            // 远程 SSH 部署
+                            withCredentials([sshUserPrivateKey(
+                                credentialsId: 'ssh-deploy-key',
+                                keyFileVariable: 'SSH_KEY',
+                                usernameVariable: 'SSH_USER'
+                            )]) {
                                 sh """
-                                    scp -i ${SSH_KEY} -P ${params.TARGET_PORT} \
-                                        image.tar.gz \
+                                    scp -o StrictHostKeyChecking=no -i ${SSH_KEY} -P ${params.TARGET_PORT} \
+                                        jenkins/docker/docker-compose.deploy.yml .env \
                                         ${params.TARGET_USER}@${params.TARGET_HOST}:/opt/app/
                                 """
-                            }
-
-                            // 远程执行部署
-                            sh """
-                                ssh -i ${SSH_KEY} -p ${params.TARGET_PORT} \
-                                    ${params.TARGET_USER}@${params.TARGET_HOST} << 'DEPLOY_EOF'
-                                    cd /opt/app
-                                    ${params.PUSH_REGISTRY ? 'docker compose pull' : 'gunzip -c image.tar.gz | docker load'}
-                                    docker compose -f docker-compose.deploy.yml --profile combined up -d
+                                if (!params.PUSH_REGISTRY) {
+                                    sh """
+                                        scp -o StrictHostKeyChecking=no -i ${SSH_KEY} -P ${params.TARGET_PORT} \
+                                            image.tar.gz \
+                                            ${params.TARGET_USER}@${params.TARGET_HOST}:/opt/app/
+                                    """
+                                }
+                                sh """
+                                    ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} -p ${params.TARGET_PORT} \
+                                        ${params.TARGET_USER}@${params.TARGET_HOST} << 'DEPLOY_EOF'
+                                        cd /opt/app
+                                        ${params.PUSH_REGISTRY ? 'docker compose pull' : 'gunzip -c image.tar.gz | docker load'}
+                                        docker compose -f docker-compose.deploy.yml --profile combined up -d
 DEPLOY_EOF
-                            """
+                                """
+                            }
+                        } else {
+                            // 本地部署
+                            sh 'mkdir -p /opt/app && cp jenkins/docker/docker-compose.deploy.yml .env /opt/app/'
+                            sh 'docker compose -f jenkins/docker/docker-compose.deploy.yml --profile combined --env-file .env up -d'
                         }
                     }
                 }
@@ -246,18 +244,28 @@ DEPLOY_EOF
                 script {
                     if (IS_K8S.toBoolean()) {
                         sh "kubectl rollout restart deployment/${env.FINAL_IMAGE_NAME} -n ${params.K8S_NAMESPACE}"
-                    } else if (env.IS_LOCAL_HOST == 'true') {
-                        sh 'docker compose -f jenkins/docker/docker-compose.deploy.yml restart'
                     } else {
-                        withCredentials([sshUserPrivateKey(
-                            credentialsId: 'ssh-deploy-key',
-                            keyFileVariable: 'SSH_KEY'
-                        )]) {
-                            sh """
-                                ssh -i ${SSH_KEY} -p ${params.TARGET_PORT} \
-                                    ${params.TARGET_USER}@${params.TARGET_HOST} \
-                                    "cd /opt/app && docker compose restart"
-                            """
+                        def sshReachable = false
+                        try {
+                            sh "ssh -o ConnectTimeout=3 -o BatchMode=yes -p ${params.TARGET_PORT} ${params.TARGET_USER}@${params.TARGET_HOST} echo ok"
+                            sshReachable = true
+                        } catch (e) {
+                            echo "SSH unreachable, restarting locally"
+                        }
+
+                        if (sshReachable) {
+                            withCredentials([sshUserPrivateKey(
+                                credentialsId: 'ssh-deploy-key',
+                                keyFileVariable: 'SSH_KEY'
+                            )]) {
+                                sh """
+                                    ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} -p ${params.TARGET_PORT} \
+                                        ${params.TARGET_USER}@${params.TARGET_HOST} \
+                                        "cd /opt/app && docker compose restart"
+                                """
+                            }
+                        } else {
+                            sh 'docker compose -f jenkins/docker/docker-compose.deploy.yml restart'
                         }
                     }
                 }
@@ -273,7 +281,7 @@ DEPLOY_EOF
                 script {
                     def baseUrl = IS_K8S.toBoolean()
                         ? "http://${env.FINAL_IMAGE_NAME}.${params.K8S_NAMESPACE}.svc.cluster.local"
-                        : (env.IS_LOCAL_HOST == 'true' ? "http://localhost" : "http://${params.TARGET_HOST}")
+                        : "http://localhost"
 
                     // 从 ENV_VARS 中提取 PORT
                     def port = '3100'
