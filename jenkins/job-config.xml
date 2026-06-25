@@ -1,0 +1,285 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job">
+  <description>Paperclip 通用构建部署 Pipeline</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+      <triggers/>
+    </org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+  </properties>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps">
+    <script>
+/**
+ * Jenkins 通用构建部署 Pipeline
+ *
+ * 支持任意项目的 Docker 化构建和部署。
+ * 使用方式：在 Jenkins Job 中配置此 Jenkinsfile，构建时填入目标项目参数。
+ */
+
+pipeline {
+    agent { label 'docker' }
+
+    parameters {
+        // ---- 代码来源 ----
+        string(name: 'GIT_URL', description: 'Git 仓库地址')
+        choice(name: 'BRANCH', choices: ['main', 'master', 'dev-custom', 'release/*'], description: '分支')
+
+        // ---- 项目类型 ----
+        choice(name: 'PROJECT_TYPE', choices: [
+            'node-docker',
+            'java-maven',
+            'java-gradle',
+            'python',
+            'go',
+            'custom'
+        ], description: '项目类型')
+
+        // ---- 构建配置 ----
+        string(name: 'BUILD_COMMAND', defaultValue: '', description: '自定义构建命令（PROJECT_TYPE=custom 时使用）')
+        string(name: 'DOCKERFILE', defaultValue: 'Dockerfile', description: 'Dockerfile 路径')
+        string(name: 'IMAGE_NAME', defaultValue: '', description: '镜像名称（留空自动从项目名生成）')
+        string(name: 'BUILD_ARGS', defaultValue: '', description: 'Docker build-arg，格式：KEY1=VAL1,KEY2=VAL2')
+
+        // ---- 部署配置 ----
+        choice(name: 'ACTION', choices: ['build+deploy', 'build', 'deploy', 'restart'], description: '执行动作')
+        choice(name: 'TARGET_ENV', choices: ['local', 'dev', 'test', 'demo', 'staging', 'prod'], description: '目标环境')
+        choice(name: 'DEPLOY_METHOD', choices: ['docker-compose', 'kubernetes'], description: '部署方式')
+        string(name: 'TARGET_HOST', defaultValue: 'localhost', description: '部署目标服务器')
+        string(name: 'TARGET_USER', defaultValue: 'root', description: 'SSH 用户')
+        string(name: 'TARGET_PORT', defaultValue: '22', description: 'SSH 端口')
+        string(name: 'K8S_NAMESPACE', defaultValue: 'default', description: 'K8s 命名空间')
+
+        // ---- 镜像仓库 ----
+        booleanParam(name: 'PUSH_REGISTRY', defaultValue: false, description: '是否推送到镜像仓库')
+        string(name: 'REGISTRY', defaultValue: 'harbor.example.com', description: '镜像仓库地址')
+
+        // ---- 环境变量注入 ----
+        text(name: 'ENV_VARS', defaultValue: '', description: '额外环境变量，每行一个 KEY=VALUE')
+        password(name: 'SECRET_VARS', defaultValue: '', description: '敏感环境变量（Jenkins 自动遮蔽）')
+    }
+
+    environment {
+        TAG = "${params.BRANCH}-${params.TARGET_ENV}-${env.BUILD_NUMBER}"
+        IS_LOCAL = (params.TARGET_HOST == 'localhost' || params.TARGET_HOST == '127.0.0.1')
+        IS_K8S = (params.DEPLOY_METHOD == 'kubernetes')
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: params.BRANCH]],
+                    userRemoteConfigs: [[url: params.GIT_URL]]
+                ])
+            }
+        }
+
+        stage('Detect &amp; Validate') {
+            steps {
+                script {
+                    env.DETECTED_TYPE = params.PROJECT_TYPE
+                    if (params.IMAGE_NAME) {
+                        env.FINAL_IMAGE_NAME = params.IMAGE_NAME
+                    } else {
+                        def repoName = params.GIT_URL.split('/').last().replace('.git', '')
+                        if (params.PUSH_REGISTRY) {
+                            env.FINAL_IMAGE_NAME = "${params.REGISTRY}/${repoName}"
+                        } else {
+                            env.FINAL_IMAGE_NAME = repoName
+                        }
+                    }
+                    echo "========================================"
+                    echo "Project Type: ${env.DETECTED_TYPE}"
+                    echo "Image Name:   ${env.FINAL_IMAGE_NAME}:${TAG}"
+                    echo "Target Env:   ${params.TARGET_ENV}"
+                    echo "Deploy Method: ${params.DEPLOY_METHOD}"
+                    echo "Target Host:  ${params.TARGET_HOST}"
+                    echo "========================================"
+                }
+            }
+        }
+
+        stage('Build') {
+            when { expression { params.ACTION in ['build', 'build+deploy'] } }
+            steps {
+                script {
+                    def buildArgs = ''
+                    if (params.BUILD_ARGS) {
+                        buildArgs = params.BUILD_ARGS.split(',').collect {
+                            "--build-arg ${it.trim()}"
+                        }.join(' ')
+                    }
+
+                    switch (env.DETECTED_TYPE) {
+                        case 'node-docker':
+                            sh "docker build -f ${params.DOCKERFILE} ${buildArgs} -t ${FINAL_IMAGE_NAME}:${TAG} ."
+                            break
+                        case 'java-maven':
+                            sh 'mvn clean package -DskipTests'
+                            sh "docker build -f ${params.DOCKERFILE} ${buildArgs} -t ${FINAL_IMAGE_NAME}:${TAG} ."
+                            break
+                        case 'java-gradle':
+                            sh './gradlew bootJar'
+                            sh "docker build -f ${params.DOCKERFILE} ${buildArgs} -t ${FINAL_IMAGE_NAME}:${TAG} ."
+                            break
+                        case 'python':
+                            sh "docker build -f ${params.DOCKERFILE} ${buildArgs} -t ${FINAL_IMAGE_NAME}:${TAG} ."
+                            break
+                        case 'go':
+                            sh "docker build -f ${params.DOCKERFILE} ${buildArgs} -t ${FINAL_IMAGE_NAME}:${TAG} ."
+                            break
+                        case 'custom':
+                            if (params.BUILD_COMMAND) {
+                                sh params.BUILD_COMMAND
+                            }
+                            if (fileExists(params.DOCKERFILE)) {
+                                sh "docker build -f ${params.DOCKERFILE} ${buildArgs} -t ${FINAL_IMAGE_NAME}:${TAG} ."
+                            }
+                            break
+                    }
+
+                    def envContent = params.ENV_VARS ?: ''
+                    if (params.SECRET_VARS) {
+                        envContent += '\n' + params.SECRET_VARS
+                    }
+                    writeFile file: '.env', text: envContent.trim()
+
+                    if (params.PUSH_REGISTRY &amp;&amp; !IS_LOCAL.toBoolean()) {
+                        sh "docker tag ${FINAL_IMAGE_NAME}:${TAG} ${FINAL_IMAGE_NAME}:latest"
+                        withCredentials([usernamePassword(
+                            credentialsId: 'docker-registry-auth',
+                            usernameVariable: 'REGISTRY_USER',
+                            passwordVariable: 'REGISTRY_PASS'
+                        )]) {
+                            sh "echo \$REGISTRY_PASS | docker login ${params.REGISTRY} -u \$REGISTRY_USER --password-stdin"
+                            sh "docker push ${FINAL_IMAGE_NAME}:${TAG}"
+                            sh "docker push ${FINAL_IMAGE_NAME}:latest"
+                        }
+                    }
+
+                    if (!IS_LOCAL.toBoolean() &amp;&amp; !params.PUSH_REGISTRY &amp;&amp; !IS_K8S.toBoolean()) {
+                        sh "docker save ${FINAL_IMAGE_NAME}:${TAG} | gzip > image.tar.gz"
+                    }
+                }
+            }
+        }
+
+        stage('Deploy') {
+            when { expression { params.ACTION in ['deploy', 'build+deploy'] } }
+            steps {
+                script {
+                    if (IS_K8S.toBoolean()) {
+                        sh """
+                            kubectl set image deployment/${env.FINAL_IMAGE_NAME} \
+                                ${env.FINAL_IMAGE_NAME}=${FINAL_IMAGE_NAME}:${TAG} \
+                                -n ${params.K8S_NAMESPACE}
+                            kubectl rollout status deployment/${env.FINAL_IMAGE_NAME} \
+                                -n ${params.K8S_NAMESPACE} --timeout=300s
+                        """
+                    } else if (IS_LOCAL.toBoolean()) {
+                        sh 'docker compose -f jenkins/docker/docker-compose.deploy.yml --profile combined --env-file .env up -d'
+                    } else {
+                        withCredentials([sshUserPrivateKey(
+                            credentialsId: 'ssh-deploy-key',
+                            keyFileVariable: 'SSH_KEY',
+                            usernameVariable: 'SSH_USER'
+                        )]) {
+                            sh """
+                                scp -i ${SSH_KEY} -P ${params.TARGET_PORT} \
+                                    jenkins/docker/docker-compose.deploy.yml .env \
+                                    ${params.TARGET_USER}@${params.TARGET_HOST}:/opt/app/
+                            """
+                            if (!params.PUSH_REGISTRY) {
+                                sh """
+                                    scp -i ${SSH_KEY} -P ${params.TARGET_PORT} \
+                                        image.tar.gz \
+                                        ${params.TARGET_USER}@${params.TARGET_HOST}:/opt/app/
+                                """
+                            }
+                            sh """
+                                ssh -i ${SSH_KEY} -p ${params.TARGET_PORT} \
+                                    ${params.TARGET_USER}@${params.TARGET_HOST} &lt;&lt; 'DEPLOY_EOF'
+                                    cd /opt/app
+                                    ${params.PUSH_REGISTRY ? 'docker compose pull' : 'gunzip -c image.tar.gz | docker load'}
+                                    docker compose -f docker-compose.deploy.yml --profile combined up -d
+DEPLOY_EOF
+                            """
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Restart') {
+            when { expression { params.ACTION == 'restart' } }
+            steps {
+                script {
+                    if (IS_K8S.toBoolean()) {
+                        sh "kubectl rollout restart deployment/${env.FINAL_IMAGE_NAME} -n ${params.K8S_NAMESPACE}"
+                    } else if (IS_LOCAL.toBoolean()) {
+                        sh 'docker compose -f jenkins/docker/docker-compose.deploy.yml restart'
+                    } else {
+                        withCredentials([sshUserPrivateKey(credentialsId: 'ssh-deploy-key', keyFileVariable: 'SSH_KEY')]) {
+                            sh """
+                                ssh -i ${SSH_KEY} -p ${params.TARGET_PORT} \
+                                    ${params.TARGET_USER}@${params.TARGET_HOST} \
+                                    "cd /opt/app && docker compose restart"
+                            """
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Health Check') {
+            when { expression { params.ACTION != 'build' } }
+            steps {
+                script {
+                    def baseUrl = IS_K8S.toBoolean()
+                        ? "http://${env.FINAL_IMAGE_NAME}.${params.K8S_NAMESPACE}.svc.cluster.local"
+                        : (IS_LOCAL.toBoolean() ? "http://localhost" : "http://${params.TARGET_HOST}")
+
+                    def port = '3100'
+                    if (params.ENV_VARS?.contains('PORT=')) {
+                        def portLine = params.ENV_VARS.readLines().find { it.startsWith('PORT=') }
+                        if (portLine) {
+                            port = portLine.split('=')[1].trim()
+                        }
+                    }
+
+                    sh """
+                        echo "Checking health at ${baseUrl}:${port}/api/health"
+                        for i in \$(seq 1 30); do
+                            if curl -sf ${baseUrl}:${port}/api/health; then
+                                echo "Health check passed!"
+                                exit 0
+                            fi
+                            echo "Attempt \$i/30 failed, retrying in 2s..."
+                            sleep 2
+                        done
+                        echo "Health check timeout after 60s (non-fatal)"
+                    """
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            cleanWs()
+        }
+        success {
+            echo "Pipeline completed successfully!"
+        }
+        failure {
+            echo "Pipeline failed!"
+        }
+    }
+}
+    </script>
+    <sandbox>true</sandbox>
+  </definition>
+  <triggers/>
+  <disabled>false</disabled>
+</flow-definition>

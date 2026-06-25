@@ -1,0 +1,49 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job">
+  <description>Paperclip Deploy Pipeline</description>
+  <keepDependencies>false</keepDependencies>
+  <properties/>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps">
+    <script>
+pipeline {
+    agent any
+    parameters {
+        string(name: 'GIT_URL', defaultValue: 'https://github.com/Linuary/paperclip.git', description: 'Git repo')
+        choice(name: 'BRANCH', choices: ['dev-custom', 'main', 'master'])
+        string(name: 'TARGET_HOST', defaultValue: '47.236.51.128', description: 'Deploy host')
+        string(name: 'TARGET_PORT', defaultValue: '22')
+        text(name: 'ENV_VARS', defaultValue: 'PORT=8088\nSERVE_UI=true\nPAPERCLIP_DEPLOYMENT_MODE=authenticated')
+        password(name: 'SECRET_VARS', defaultValue: '', description: 'Secrets')
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout([$class: 'GitSCM', branches: [[name: params.BRANCH]], userRemoteConfigs: [[url: params.GIT_URL]]])
+            }
+        }
+        stage('Build') {
+            steps {
+                sh "docker build -f Dockerfile -t paperclip:${env.BUILD_NUMBER} ."
+            }
+        }
+        stage('Save Image') {
+            steps {
+                sh "docker save paperclip:${env.BUILD_NUMBER} | gzip > image.tar.gz"
+            }
+        }
+        stage('Deploy') {
+            steps {
+                sshagent(['ssh-deploy-key']) {
+                    sh "scp -o StrictHostKeyChecking=no -P ${params.TARGET_PORT} image.tar.gz root@${params.TARGET_HOST}:/opt/app/"
+                    sh "ssh -o StrictHostKeyChecking=no -p ${params.TARGET_PORT} root@${params.TARGET_HOST} 'cd /opt/app && gunzip -c image.tar.gz | docker load && docker compose up -d'"
+                }
+            }
+        }
+    }
+}
+    </script>
+    <sandbox>true</sandbox>
+  </definition>
+  <triggers/>
+  <disabled>false</disabled>
+</flow-definition>

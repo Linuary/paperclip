@@ -1,0 +1,74 @@
+# Paperclip 部署编排文件
+# 支持合并模式（combined）和分离模式（split）
+
+services:
+  # ============================================
+  # 公共服务：PostgreSQL 数据库
+  # ============================================
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${DB_USER:-paperclip}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-paperclip}
+      POSTGRES_DB: ${DB_NAME:-paperclip}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${DB_USER:-paperclip}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    profiles: ["combined", "split"]
+
+  # ============================================
+  # 合并模式：前后端一体
+  # ============================================
+  paperclip:
+    image: ${IMAGE_NAME:-paperclip}:${IMAGE_TAG:-latest}
+    env_file: ${ENV_FILE:-.env}
+    ports:
+      - "${PORT:-3100}:${PORT:-3100}"
+    volumes:
+      - paperclip-data:/paperclip
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    profiles: ["combined"]
+
+  # ============================================
+  # 分离模式：前端
+  # ============================================
+  paperclip-ui:
+    image: ${UI_IMAGE_NAME:-paperclip-ui}:${IMAGE_TAG:-latest}
+    ports:
+      - "${UI_PORT:-80}:80"
+    environment:
+      BACKEND_URL: ${BACKEND_URL:-http://paperclip-server:3100}
+    depends_on:
+      - paperclip-server
+    restart: unless-stopped
+    profiles: ["split"]
+
+  # ============================================
+  # 分离模式：后端
+  # ============================================
+  paperclip-server:
+    image: ${SERVER_IMAGE_NAME:-paperclip-server}:${IMAGE_TAG:-latest}
+    env_file: ${ENV_FILE:-.env}
+    environment:
+      SERVE_UI: "false"
+    ports:
+      - "${PORT:-3100}:${PORT:-3100}"
+    volumes:
+      - paperclip-data:/paperclip
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    profiles: ["split"]
+
+volumes:
+  pgdata:
+  paperclip-data:
