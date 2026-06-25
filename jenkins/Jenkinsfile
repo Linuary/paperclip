@@ -188,48 +188,9 @@ pipeline {
                                 -n ${params.K8S_NAMESPACE} --timeout=300s
                         """
                     } else {
-                        // 先测试 SSH 连通性，不通则回退到本地部署
-                        def sshReachable = false
-                        try {
-                            sh "ssh -o ConnectTimeout=3 -o BatchMode=yes -p ${params.TARGET_PORT} ${params.TARGET_USER}@${params.TARGET_HOST} echo ok"
-                            sshReachable = true
-                        } catch (e) {
-                            echo "SSH to ${params.TARGET_HOST} unreachable, falling back to local deploy"
-                        }
-
-                        if (sshReachable) {
-                            // 远程 SSH 部署
-                            withCredentials([sshUserPrivateKey(
-                                credentialsId: 'ssh-deploy-key',
-                                keyFileVariable: 'SSH_KEY',
-                                usernameVariable: 'SSH_USER'
-                            )]) {
-                                sh """
-                                    scp -o StrictHostKeyChecking=no -i ${SSH_KEY} -P ${params.TARGET_PORT} \
-                                        jenkins/docker/docker-compose.deploy.yml .env \
-                                        ${params.TARGET_USER}@${params.TARGET_HOST}:/opt/app/
-                                """
-                                if (!params.PUSH_REGISTRY) {
-                                    sh """
-                                        scp -o StrictHostKeyChecking=no -i ${SSH_KEY} -P ${params.TARGET_PORT} \
-                                            image.tar.gz \
-                                            ${params.TARGET_USER}@${params.TARGET_HOST}:/opt/app/
-                                    """
-                                }
-                                sh """
-                                    ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} -p ${params.TARGET_PORT} \
-                                        ${params.TARGET_USER}@${params.TARGET_HOST} << 'DEPLOY_EOF'
-                                        cd /opt/app
-                                        ${params.PUSH_REGISTRY ? 'docker compose pull' : 'gunzip -c image.tar.gz | docker load'}
-                                        docker compose -f docker-compose.deploy.yml --profile combined up -d
-DEPLOY_EOF
-                                """
-                            }
-                        } else {
-                            // 本地部署
-                            sh 'mkdir -p /opt/app && cp jenkins/docker/docker-compose.deploy.yml .env /opt/app/'
-                            sh 'docker compose -f jenkins/docker/docker-compose.deploy.yml --profile combined --env-file .env up -d'
-                        }
+                        // 本地部署（Jenkins agent 与目标服务器同机）
+                        sh 'mkdir -p /opt/app && cp jenkins/docker/docker-compose.deploy.yml .env /opt/app/'
+                        sh 'docker compose -f jenkins/docker/docker-compose.deploy.yml --profile combined --env-file .env up -d'
                     }
                 }
             }
@@ -245,28 +206,7 @@ DEPLOY_EOF
                     if (IS_K8S.toBoolean()) {
                         sh "kubectl rollout restart deployment/${env.FINAL_IMAGE_NAME} -n ${params.K8S_NAMESPACE}"
                     } else {
-                        def sshReachable = false
-                        try {
-                            sh "ssh -o ConnectTimeout=3 -o BatchMode=yes -p ${params.TARGET_PORT} ${params.TARGET_USER}@${params.TARGET_HOST} echo ok"
-                            sshReachable = true
-                        } catch (e) {
-                            echo "SSH unreachable, restarting locally"
-                        }
-
-                        if (sshReachable) {
-                            withCredentials([sshUserPrivateKey(
-                                credentialsId: 'ssh-deploy-key',
-                                keyFileVariable: 'SSH_KEY'
-                            )]) {
-                                sh """
-                                    ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} -p ${params.TARGET_PORT} \
-                                        ${params.TARGET_USER}@${params.TARGET_HOST} \
-                                        "cd /opt/app && docker compose restart"
-                                """
-                            }
-                        } else {
-                            sh 'docker compose -f jenkins/docker/docker-compose.deploy.yml restart'
-                        }
+                        sh 'docker compose -f jenkins/docker/docker-compose.deploy.yml restart'
                     }
                 }
             }
