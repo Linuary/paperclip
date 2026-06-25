@@ -88,12 +88,21 @@ pipeline {
                         }
                     }
 
+                    // 检测目标主机是否为本机
+                    def localIPs = sh(script: "hostname -I 2>/dev/null || echo ''", returnStdout: true).trim().split()
+                    if (localIPs.contains(params.TARGET_HOST)) {
+                        env.IS_LOCAL_HOST = 'true'
+                    } else {
+                        env.IS_LOCAL_HOST = 'false'
+                    }
+
                     echo "========================================"
                     echo "Project Type: ${env.DETECTED_TYPE}"
                     echo "Image Name:   ${env.FINAL_IMAGE_NAME}:${TAG}"
                     echo "Target Env:   ${params.TARGET_ENV}"
                     echo "Deploy Method: ${params.DEPLOY_METHOD}"
                     echo "Target Host:  ${params.TARGET_HOST}"
+                    echo "Is Local:     ${env.IS_LOCAL_HOST}"
                     echo "========================================"
                 }
             }
@@ -188,7 +197,7 @@ pipeline {
                             kubectl rollout status deployment/${env.FINAL_IMAGE_NAME} \
                                 -n ${params.K8S_NAMESPACE} --timeout=300s
                         """
-                    } else if (IS_LOCAL.toBoolean()) {
+                    } else if (env.IS_LOCAL_HOST == 'true') {
                         // 本地部署
                         sh 'docker compose -f jenkins/docker/docker-compose.deploy.yml --profile combined --env-file .env up -d'
                     } else {
@@ -237,7 +246,7 @@ DEPLOY_EOF
                 script {
                     if (IS_K8S.toBoolean()) {
                         sh "kubectl rollout restart deployment/${env.FINAL_IMAGE_NAME} -n ${params.K8S_NAMESPACE}"
-                    } else if (IS_LOCAL.toBoolean()) {
+                    } else if (env.IS_LOCAL_HOST == 'true') {
                         sh 'docker compose -f jenkins/docker/docker-compose.deploy.yml restart'
                     } else {
                         withCredentials([sshUserPrivateKey(
@@ -264,7 +273,7 @@ DEPLOY_EOF
                 script {
                     def baseUrl = IS_K8S.toBoolean()
                         ? "http://${env.FINAL_IMAGE_NAME}.${params.K8S_NAMESPACE}.svc.cluster.local"
-                        : (IS_LOCAL.toBoolean() ? "http://localhost" : "http://${params.TARGET_HOST}")
+                        : (env.IS_LOCAL_HOST == 'true' ? "http://localhost" : "http://${params.TARGET_HOST}")
 
                     // 从 ENV_VARS 中提取 PORT
                     def port = '3100'
