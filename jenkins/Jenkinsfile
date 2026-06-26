@@ -236,7 +236,7 @@ pipeline {
                             sh """
                                 ssh -i \$SSH_KEY -p ${params.TARGET_PORT} -o StrictHostKeyChecking=no \
                                     \$SSH_USER@${params.TARGET_HOST} \
-                                    "sudo mkdir -p /opt/app && sudo chown \$SSH_USER:\$SSH_USER /opt/app"
+                                    "mkdir -p /opt/app"
                                 scp -i \$SSH_KEY -P ${params.TARGET_PORT} -o StrictHostKeyChecking=no \
                                     ${filesToCopy} \
                                     \$SSH_USER@${params.TARGET_HOST}:/opt/app/
@@ -249,7 +249,7 @@ pipeline {
                                     \$SSH_USER@${params.TARGET_HOST} << 'DEPLOY_EOF'
                                     cd /opt/app
                                     ${deployCmd}
-                                    sudo docker compose -f docker-compose.deploy.yml --profile combined ${profilesArg} --env-file .env up -d
+                                    docker compose -f docker-compose.deploy.yml --profile combined ${profilesArg} --env-file .env up -d
 DEPLOY_EOF
                             """
                         }
