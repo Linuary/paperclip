@@ -52,6 +52,11 @@
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
+          <name>USE_VERSION_TAG</name>
+          <defaultValue>false</defaultValue>
+          <description>使用版本标签（build号），否则使用固定标签自动覆盖</description>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
           <name>DEPLOY_CLAUDE_CODE</name>
           <defaultValue>false</defaultValue>
           <description>部署 Claude Code 容器</description>
