@@ -33,12 +33,14 @@
           </choices>
           <description>项目类型</description>
         </hudson.model.ChoiceParameterDefinition>
-        <hudson.model.StringParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
           <name>DOCKERFILE</name>
-          <defaultValue>jenkins/Dockerfile.backend</defaultValue>
-          <description>Dockerfile 路径</description>
-          <trim>false</trim>
-        </hudson.model.StringParameterDefinition>
+          <choices>
+            <string>Dockerfile</string>
+            <string>jenkins/Dockerfile.backend</string>
+          </choices>
+          <description>Dockerfile 路径（合并模式用 Dockerfile，分离模式用 jenkins/Dockerfile.backend）</description>
+        </hudson.model.ChoiceParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>IMAGE_NAME</name>
           <defaultValue></defaultValue>
