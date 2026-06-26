@@ -55,7 +55,7 @@ pipeline {
     }
 
     environment {
-        TAG = "${params.BRANCH}-${params.TARGET_ENV}" + (params.USE_VERSION_TAG ? "-${env.BUILD_NUMBER}" : "")
+        TAG = "${params.BRANCH}-${params.TARGET_ENV}"
     }
 
     stages {
@@ -80,6 +80,11 @@ pipeline {
                 script {
                     // 自动检测项目类型
                     env.DETECTED_TYPE = params.PROJECT_TYPE
+
+                    // 计算 TAG（根据 USE_VERSION_TAG 参数）
+                    if (params.USE_VERSION_TAG) {
+                        env.TAG = "${params.BRANCH}-${params.TARGET_ENV}-${env.BUILD_NUMBER}"
+                    }
 
                     // 计算部署模式标志
                     env.IS_LOCAL = (params.TARGET_HOST == 'localhost' || params.TARGET_HOST == '127.0.0.1') ? 'true' : 'false'
