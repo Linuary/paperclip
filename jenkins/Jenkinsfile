@@ -29,9 +29,9 @@ pipeline {
         string(name: 'IMAGE_NAME', defaultValue: '', description: '镜像名称（留空自动从项目名生成）')
         string(name: 'BUILD_ARGS', defaultValue: '', description: 'Docker build-arg，格式：KEY1=VAL1,KEY2=VAL2')
 
-        // ---- AI CLI 工具配置（独立容器） ----
-        booleanParam(name: 'DEPLOY_CLAUDE_CODE', defaultValue: true, description: '部署 Claude Code 容器')
-        booleanParam(name: 'DEPLOY_OPENAI_CODEX', defaultValue: true, description: '部署 OpenAI Codex 容器')
+        // ---- AI CLI 工具配置（独立容器，按需选择） ----
+        booleanParam(name: 'DEPLOY_CLAUDE_CODE', defaultValue: false, description: '部署 Claude Code 容器')
+        booleanParam(name: 'DEPLOY_OPENAI_CODEX', defaultValue: false, description: '部署 OpenAI Codex 容器')
         booleanParam(name: 'DEPLOY_OPENCODE', defaultValue: false, description: '部署 OpenCode 容器')
         booleanParam(name: 'DEPLOY_GEMINI_CLI', defaultValue: false, description: '部署 Google Gemini 容器')
 

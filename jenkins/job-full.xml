@@ -53,12 +53,12 @@
         </hudson.model.StringParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>DEPLOY_CLAUDE_CODE</name>
-          <defaultValue>true</defaultValue>
+          <defaultValue>false</defaultValue>
           <description>部署 Claude Code 容器</description>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>DEPLOY_OPENAI_CODEX</name>
-          <defaultValue>true</defaultValue>
+          <defaultValue>false</defaultValue>
           <description>部署 OpenAI Codex 容器</description>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
