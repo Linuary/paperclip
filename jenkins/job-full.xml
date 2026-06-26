@@ -129,7 +129,8 @@
           <defaultValue>PORT=8088
 SERVE_UI=true
 PAPERCLIP_DEPLOYMENT_MODE=authenticated
-PAPERCLIP_DEPLOYMENT_EXPOSURE=private</defaultValue>
+PAPERCLIP_DEPLOYMENT_EXPOSURE=private
+BETTER_AUTH_SECRET=paperclip-dev-secret</defaultValue>
           <description>额外环境变量，每行一个 KEY=VALUE</description>
         </hudson.model.TextParameterDefinition>
         <hudson.model.PasswordParameterDefinition>
