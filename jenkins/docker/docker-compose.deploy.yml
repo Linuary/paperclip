@@ -27,6 +27,7 @@ services:
   # ============================================
   paperclip:
     image: ${IMAGE_NAME:-paperclip}:${IMAGE_TAG:-latest}
+    pull_policy: never
     env_file: .env
     ports:
       - "${PORT:-3100}:${PORT:-3100}"
