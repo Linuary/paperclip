@@ -226,31 +226,44 @@ pipeline {
                             keyFileVariable: 'SSH_KEY',
                             usernameVariable: 'SSH_USER'
                         )]) {
+                            // 使用唯一临时目录避免冲突
+                            def tmpDir = "/tmp/paperclip-deploy-${env.BUILD_NUMBER}"
+
                             // 确定需要传输的文件
                             def filesToCopy = 'jenkins/docker/docker-compose.deploy.yml .env'
                             if (!params.PUSH_REGISTRY) {
                                 filesToCopy += ' image.tar.gz'
                             }
 
-                            // 传输文件到远程服务器 /tmp/ 目录
+                            // 创建临时目录并传输文件
                             sh """
+                                ssh -i \$SSH_KEY -o StrictHostKeyChecking=no \
+                                    \$SSH_USER@${params.TARGET_HOST} \
+                                    "mkdir -p ${tmpDir}"
                                 scp -i \$SSH_KEY -o StrictHostKeyChecking=no \
                                     ${filesToCopy} \
-                                    \$SSH_USER@${params.TARGET_HOST}:/tmp/
+                                    \$SSH_USER@${params.TARGET_HOST}:${tmpDir}/
                             """
 
                             // 传输部署脚本
                             sh """
                                 scp -i \$SSH_KEY -o StrictHostKeyChecking=no \
                                     jenkins/scripts/remote-deploy.sh \
-                                    \$SSH_USER@${params.TARGET_HOST}:/tmp/
+                                    \$SSH_USER@${params.TARGET_HOST}:${tmpDir}/
                             """
 
                             // 设置环境变量并执行远程部署脚本
                             sh """
                                 ssh -i \$SSH_KEY -o StrictHostKeyChecking=no \
                                     \$SSH_USER@${params.TARGET_HOST} \
-                                    "export AI_PROFILES='${profilesArg}' && bash /tmp/remote-deploy.sh"
+                                    "export AI_PROFILES='${profilesArg}' && bash ${tmpDir}/remote-deploy.sh"
+                            """
+
+                            // 清理临时目录
+                            sh """
+                                ssh -i \$SSH_KEY -o StrictHostKeyChecking=no \
+                                    \$SSH_USER@${params.TARGET_HOST} \
+                                    "rm -rf ${tmpDir}"
                             """
                         }
                     }
