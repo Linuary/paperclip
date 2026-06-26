@@ -1,5 +1,6 @@
 # Paperclip 部署编排文件
 # 支持合并模式（combined）和分离模式（split）
+# AI CLI 工具可选启用，每个独立容器
 
 services:
   # ============================================
@@ -22,7 +23,7 @@ services:
     profiles: ["combined", "split"]
 
   # ============================================
-  # 合并模式：前后端一体
+  # 合并模式：前后端一体（不含 AI CLI）
   # ============================================
   paperclip:
     image: ${IMAGE_NAME:-paperclip}:${IMAGE_TAG:-latest}
@@ -69,6 +70,49 @@ services:
     restart: unless-stopped
     profiles: ["split"]
 
+  # ============================================
+  # AI CLI 工具（可选，每个独立容器）
+  # ============================================
+  claude-code:
+    image: ${CLAUDE_CODE_IMAGE:-paperclipai/agent-runtime-claude}:${IMAGE_TAG:-latest}
+    volumes:
+      - claude-data:/home/paperclip
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+    restart: unless-stopped
+    profiles: ["claude-code"]
+
+  codex:
+    image: ${CODEX_IMAGE:-paperclipai/agent-runtime-codex}:${IMAGE_TAG:-latest}
+    volumes:
+      - codex-data:/home/paperclip
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+    restart: unless-stopped
+    profiles: ["codex"]
+
+  opencode:
+    image: ${OPENCODE_IMAGE:-paperclipai/agent-runtime-opencode}:${IMAGE_TAG:-latest}
+    volumes:
+      - opencode-data:/home/paperclip
+    environment:
+      - OPENCODE_API_KEY=${OPENCODE_API_KEY:-}
+    restart: unless-stopped
+    profiles: ["opencode"]
+
+  gemini-cli:
+    image: ${GEMINI_IMAGE:-paperclipai/agent-runtime-gemini}:${IMAGE_TAG:-latest}
+    volumes:
+      - gemini-data:/home/paperclip
+    environment:
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
+    restart: unless-stopped
+    profiles: ["gemini"]
+
 volumes:
   pgdata:
   paperclip-data:
+  claude-data:
+  codex-data:
+  opencode-data:
+  gemini-data:

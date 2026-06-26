@@ -29,6 +29,12 @@ pipeline {
         string(name: 'IMAGE_NAME', defaultValue: '', description: '镜像名称（留空自动从项目名生成）')
         string(name: 'BUILD_ARGS', defaultValue: '', description: 'Docker build-arg，格式：KEY1=VAL1,KEY2=VAL2')
 
+        // ---- AI CLI 工具配置（独立容器） ----
+        booleanParam(name: 'DEPLOY_CLAUDE_CODE', defaultValue: true, description: '部署 Claude Code 容器')
+        booleanParam(name: 'DEPLOY_OPENAI_CODEX', defaultValue: true, description: '部署 OpenAI Codex 容器')
+        booleanParam(name: 'DEPLOY_OPENCODE', defaultValue: false, description: '部署 OpenCode 容器')
+        booleanParam(name: 'DEPLOY_GEMINI_CLI', defaultValue: false, description: '部署 Google Gemini 容器')
+
         // ---- 部署配置 ----
         choice(name: 'ACTION', choices: ['build+deploy', 'build', 'deploy', 'restart'], description: '执行动作')
         choice(name: 'TARGET_ENV', choices: ['local', 'dev', 'test', 'demo', 'staging', 'prod'], description: '目标环境')
@@ -183,6 +189,14 @@ pipeline {
             when { expression { params.ACTION in ['deploy', 'build+deploy'] } }
             steps {
                 script {
+                    // 构建 AI CLI profiles
+                    def aiProfiles = []
+                    if (params.DEPLOY_CLAUDE_CODE) aiProfiles.add('claude-code')
+                    if (params.DEPLOY_OPENAI_CODEX) aiProfiles.add('codex')
+                    if (params.DEPLOY_OPENCODE) aiProfiles.add('opencode')
+                    if (params.DEPLOY_GEMINI_CLI) aiProfiles.add('gemini')
+                    def profilesArg = aiProfiles.collect { "--profile ${it}" }.join(' ')
+
                     if (env.IS_K8S == 'true') {
                         // Kubernetes 部署
                         sh """
@@ -195,7 +209,7 @@ pipeline {
                     } else if (env.IS_LOCAL == 'true') {
                         // 本地部署（Jenkins agent 与目标服务器同机）
                         sh 'mkdir -p /opt/app && cp jenkins/docker/docker-compose.deploy.yml .env /opt/app/'
-                        sh 'docker compose -f /opt/app/docker-compose.deploy.yml --profile combined --env-file /opt/app/.env up -d'
+                        sh "docker compose -f /opt/app/docker-compose.deploy.yml --profile combined ${profilesArg} --env-file /opt/app/.env up -d"
                     } else {
                         // 远程 SSH 部署
                         withCredentials([sshUserPrivateKey(
@@ -226,7 +240,7 @@ pipeline {
                                     \$SSH_USER@${params.TARGET_HOST} << 'DEPLOY_EOF'
                                     cd /opt/app
                                     ${deployCmd}
-                                    docker compose -f docker-compose.deploy.yml --profile combined --env-file .env up -d
+                                    docker compose -f docker-compose.deploy.yml --profile combined ${profilesArg} --env-file .env up -d
 DEPLOY_EOF
                             """
                         }

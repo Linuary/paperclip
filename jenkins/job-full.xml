@@ -51,6 +51,26 @@
           <description>Docker build-arg，格式：KEY1=VAL1,KEY2=VAL2</description>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>DEPLOY_CLAUDE_CODE</name>
+          <defaultValue>true</defaultValue>
+          <description>部署 Claude Code 容器</description>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>DEPLOY_OPENAI_CODEX</name>
+          <defaultValue>true</defaultValue>
+          <description>部署 OpenAI Codex 容器</description>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>DEPLOY_OPENCODE</name>
+          <defaultValue>false</defaultValue>
+          <description>部署 OpenCode 容器</description>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>DEPLOY_GEMINI_CLI</name>
+          <defaultValue>false</defaultValue>
+          <description>部署 Google Gemini 容器</description>
+        </hudson.model.BooleanParameterDefinition>
         <hudson.model.ChoiceParameterDefinition>
           <name>ACTION</name>
           <choices>
