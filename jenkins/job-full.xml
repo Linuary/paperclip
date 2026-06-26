@@ -34,12 +34,12 @@
           <description>项目类型</description>
         </hudson.model.ChoiceParameterDefinition>
         <hudson.model.ChoiceParameterDefinition>
-          <name>DOCKERFILE</name>
+          <name>DEPLOY_MODE</name>
           <choices>
-            <string>Dockerfile</string>
-            <string>jenkins/Dockerfile.backend</string>
+            <string>combined</string>
+            <string>split</string>
           </choices>
-          <description>Dockerfile 路径（合并模式用 Dockerfile，分离模式用 jenkins/Dockerfile.backend）</description>
+          <description>部署模式：combined=前后端一个容器，split=前后端分别容器</description>
         </hudson.model.ChoiceParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>IMAGE_NAME</name>

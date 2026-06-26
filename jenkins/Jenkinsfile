@@ -25,7 +25,7 @@ pipeline {
 
         // ---- 构建配置 ----
         string(name: 'BUILD_COMMAND', defaultValue: '', description: '自定义构建命令（PROJECT_TYPE=custom 时使用）')
-        choice(name: 'DOCKERFILE', choices: ['Dockerfile', 'jenkins/Dockerfile.backend'], description: 'Dockerfile 路径（合并模式用 Dockerfile，分离模式用 jenkins/Dockerfile.backend）')
+        choice(name: 'DEPLOY_MODE', choices: ['combined', 'split'], description: '部署模式：combined=前后端一个容器，split=前后端分别容器')
         string(name: 'IMAGE_NAME', defaultValue: '', description: '镜像名称（留空自动从项目名生成）')
         string(name: 'BUILD_ARGS', defaultValue: '', description: 'Docker build-arg，格式：KEY1=VAL1,KEY2=VAL2')
 
@@ -89,12 +89,20 @@ pipeline {
                     // 计算部署模式标志
                     env.IS_LOCAL = (params.TARGET_HOST == 'localhost' || params.TARGET_HOST == '127.0.0.1') ? 'true' : 'false'
                     env.IS_K8S = (params.DEPLOY_METHOD == 'kubernetes') ? 'true' : 'false'
+                    env.IS_COMBINED = (params.DEPLOY_MODE == 'combined') ? 'true' : 'false'
+
+                    // 根据部署模式设置 Dockerfile
+                    if (params.DEPLOY_MODE == 'combined') {
+                        env.DOCKERFILE = 'Dockerfile'
+                    } else {
+                        env.DOCKERFILE = 'jenkins/Dockerfile.backend'
+                    }
 
                     // 自动生成镜像名
+                    def repoName = params.GIT_URL.split('/').last().replace('.git', '')
                     if (params.IMAGE_NAME) {
                         env.FINAL_IMAGE_NAME = params.IMAGE_NAME
                     } else {
-                        def repoName = params.GIT_URL.split('/').last().replace('.git', '')
                         if (params.PUSH_REGISTRY) {
                             env.FINAL_IMAGE_NAME = "${params.REGISTRY}/${repoName}"
                         } else {
@@ -102,8 +110,16 @@ pipeline {
                         }
                     }
 
+                    // 分离模式需要前端镜像名
+                    if (params.DEPLOY_MODE == 'split') {
+                        env.UI_IMAGE_NAME = "${env.FINAL_IMAGE_NAME}-ui"
+                        env.SERVER_IMAGE_NAME = "${env.FINAL_IMAGE_NAME}-server"
+                    }
+
                     echo "========================================"
                     echo "Project Type: ${env.DETECTED_TYPE}"
+                    echo "Deploy Mode:  ${params.DEPLOY_MODE}"
+                    echo "Dockerfile:   ${env.DOCKERFILE}"
                     echo "Image Name:   ${env.FINAL_IMAGE_NAME}:${TAG}"
                     echo "Target Env:   ${params.TARGET_ENV}"
                     echo "Deploy Method: ${params.DEPLOY_METHOD}"
@@ -133,33 +149,14 @@ pipeline {
                         }.join(' ')
                     }
 
-                    // 根据项目类型执行构建
-                    switch (env.DETECTED_TYPE) {
-                        case 'node-docker':
-                            sh "docker build -f ${params.DOCKERFILE} ${buildArgs} -t ${FINAL_IMAGE_NAME}:${TAG} ."
-                            break
-                        case 'java-maven':
-                            sh 'mvn clean package -DskipTests'
-                            sh "docker build -f ${params.DOCKERFILE} ${buildArgs} -t ${FINAL_IMAGE_NAME}:${TAG} ."
-                            break
-                        case 'java-gradle':
-                            sh './gradlew bootJar'
-                            sh "docker build -f ${params.DOCKERFILE} ${buildArgs} -t ${FINAL_IMAGE_NAME}:${TAG} ."
-                            break
-                        case 'python':
-                            sh "docker build -f ${params.DOCKERFILE} ${buildArgs} -t ${FINAL_IMAGE_NAME}:${TAG} ."
-                            break
-                        case 'go':
-                            sh "docker build -f ${params.DOCKERFILE} ${buildArgs} -t ${FINAL_IMAGE_NAME}:${TAG} ."
-                            break
-                        case 'custom':
-                            if (params.BUILD_COMMAND) {
-                                sh params.BUILD_COMMAND
-                            }
-                            if (fileExists(params.DOCKERFILE)) {
-                                sh "docker build -f ${params.DOCKERFILE} ${buildArgs} -t ${FINAL_IMAGE_NAME}:${TAG} ."
-                            }
-                            break
+                    // 根据部署模式构建
+                    if (params.DEPLOY_MODE == 'combined') {
+                        // 合并模式：构建一个包含前后端的镜像
+                        sh "docker build -f Dockerfile ${buildArgs} -t ${FINAL_IMAGE_NAME}:${TAG} ."
+                    } else {
+                        // 分离模式：分别构建后端和前端镜像
+                        sh "docker build -f jenkins/Dockerfile.backend ${buildArgs} -t ${SERVER_IMAGE_NAME}:${TAG} ."
+                        sh "docker build -f jenkins/Dockerfile.frontend ${buildArgs} -t ${UI_IMAGE_NAME}:${TAG} ."
                     }
 
                     // 写入环境变量文件
@@ -206,6 +203,9 @@ pipeline {
                     if (params.DEPLOY_GEMINI_CLI) aiProfiles.add('gemini')
                     def profilesArg = aiProfiles.collect { "--profile ${it}" }.join(' ')
 
+                    // 根据部署模式选择 profile
+                    def deployProfile = params.DEPLOY_MODE == 'combined' ? 'combined' : 'split'
+
                     if (env.IS_K8S == 'true') {
                         // Kubernetes 部署
                         sh """
@@ -218,7 +218,7 @@ pipeline {
                     } else if (env.IS_LOCAL == 'true') {
                         // 本地部署（Jenkins agent 与目标服务器同机）
                         sh 'mkdir -p /opt/app && cp jenkins/docker/docker-compose.deploy.yml .env /opt/app/'
-                        sh "docker compose -f /opt/app/docker-compose.deploy.yml --profile combined ${profilesArg} --env-file /opt/app/.env up -d"
+                        sh "docker compose -f /opt/app/docker-compose.deploy.yml --profile ${deployProfile} ${profilesArg} --env-file /opt/app/.env up -d"
                     } else {
                         // 远程 SSH 部署
                         withCredentials([sshUserPrivateKey(
