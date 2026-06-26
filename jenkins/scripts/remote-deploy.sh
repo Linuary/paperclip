@@ -15,6 +15,13 @@ cp $SCRIPT_DIR/.env $DEPLOY_DIR/
 if [ -f $SCRIPT_DIR/image.tar.gz ]; then
     echo "Loading Docker image..."
     gunzip -c $SCRIPT_DIR/image.tar.gz | docker load
+
+    # 获取加载的镜像名称并重新打标签为 latest
+    LOADED_IMAGE=$(docker images --format "{{.Repository}}:{{.Tag}}" | head -1)
+    if [ -n "$LOADED_IMAGE" ]; then
+        echo "Tagging $LOADED_IMAGE as paperclip:latest"
+        docker tag $LOADED_IMAGE paperclip:latest
+    fi
 fi
 
 # 进入部署目录
