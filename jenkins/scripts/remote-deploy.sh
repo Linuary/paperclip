@@ -9,38 +9,9 @@ mkdir -p $DEPLOY_DIR
 
 # 复制文件到部署目录
 cp $SCRIPT_DIR/docker-compose.deploy.yml $DEPLOY_DIR/
+cp $SCRIPT_DIR/.env $DEPLOY_DIR/
 
-# 合并 .env 文件（如果已存在则合并，否则直接复制）
-if [ -f $DEPLOY_DIR/.env ]; then
-    echo "Merging .env files..."
-    # 保存旧的 .env
-    cp $DEPLOY_DIR/.env $DEPLOY_DIR/.env.old
-    # 复制新的 .env
-    cp $SCRIPT_DIR/.env $DEPLOY_DIR/.env.new
-    # 合并：新的优先，旧的补充
-    # 先读取旧的，再用新的覆盖
-    declare -A env_vars
-    while IFS='=' read -r key value; do
-        if [[ -n "$key" && ! "$key" =~ ^# ]]; then
-            env_vars["$key"]="$value"
-        fi
-    done < $DEPLOY_DIR/.env.old
-    while IFS='=' read -r key value; do
-        if [[ -n "$key" && ! "$key" =~ ^# ]]; then
-            env_vars["$key"]="$value"
-        fi
-    done < $DEPLOY_DIR/.env.new
-    # 写入合并后的 .env
-    > $DEPLOY_DIR/.env
-    for key in "${!env_vars[@]}"; do
-        echo "$key=${env_vars[$key]}" >> $DEPLOY_DIR/.env
-    done
-    rm -f $DEPLOY_DIR/.env.old $DEPLOY_DIR/.env.new
-else
-    cp $SCRIPT_DIR/.env $DEPLOY_DIR/.env
-fi
-
-# 确保 .env 中有 BETTER_AUTH_SECRET
+# 确保 .env 中有必需的变量
 if ! grep -q "BETTER_AUTH_SECRET" $DEPLOY_DIR/.env; then
     echo "BETTER_AUTH_SECRET=paperclip-dev-secret" >> $DEPLOY_DIR/.env
 fi
@@ -60,6 +31,11 @@ fi
 
 # 进入部署目录
 cd $DEPLOY_DIR
+
+# 显示 .env 内容（调试用）
+echo "=== .env content ==="
+cat .env
+echo "===================="
 
 # 执行部署
 echo "Starting deployment..."
