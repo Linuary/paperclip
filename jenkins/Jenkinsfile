@@ -25,7 +25,7 @@ pipeline {
 
         // ---- 构建配置 ----
         string(name: 'BUILD_COMMAND', defaultValue: '', description: '自定义构建命令（PROJECT_TYPE=custom 时使用）')
-        string(name: 'DOCKERFILE', defaultValue: 'Dockerfile', description: 'Dockerfile 路径')
+        string(name: 'DOCKERFILE', defaultValue: 'jenkins/Dockerfile.backend', description: 'Dockerfile 路径')
         string(name: 'IMAGE_NAME', defaultValue: '', description: '镜像名称（留空自动从项目名生成）')
         string(name: 'BUILD_ARGS', defaultValue: '', description: 'Docker build-arg，格式：KEY1=VAL1,KEY2=VAL2')
 

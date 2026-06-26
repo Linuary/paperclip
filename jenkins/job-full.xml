@@ -35,7 +35,7 @@
         </hudson.model.ChoiceParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>DOCKERFILE</name>
-          <defaultValue>Dockerfile</defaultValue>
+          <defaultValue>jenkins/Dockerfile.backend</defaultValue>
           <description>Dockerfile 路径</description>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
