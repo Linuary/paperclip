@@ -54,7 +54,7 @@ pipeline {
     }
 
     environment {
-        TAG = "${params.BRANCH}-${params.TARGET_ENV}-${env.BUILD_NUMBER}"
+        TAG = "${params.BRANCH}-${params.TARGET_ENV}"
     }
 
     stages {
@@ -116,6 +116,9 @@ pipeline {
             when { expression { params.ACTION in ['build', 'build+deploy'] } }
             steps {
                 script {
+                    // 清理旧镜像（使用固定标签会自动覆盖，但清理悬空镜像释放空间）
+                    sh "docker image prune -f || true"
+
                     // 解析 build-args
                     def buildArgs = ''
                     if (params.BUILD_ARGS) {
