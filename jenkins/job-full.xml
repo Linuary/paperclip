@@ -83,8 +83,8 @@
         </hudson.model.ChoiceParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>TARGET_HOST</name>
-          <defaultValue>47.236.51.128</defaultValue>
-          <description>部署目标服务器</description>
+          <defaultValue>172.19.25.144</defaultValue>
+          <description>部署目标服务器（使用内网 IP）</description>
           <trim>false</trim>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
