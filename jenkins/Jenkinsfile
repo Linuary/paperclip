@@ -94,7 +94,7 @@ pipeline {
 
                     // 根据部署模式设置 Dockerfile
                     if (params.DEPLOY_MODE == 'combined') {
-                        env.DOCKERFILE = 'Dockerfile'
+                        env.DOCKERFILE = 'jenkins/Dockerfile.combined'
                     } else {
                         env.DOCKERFILE = 'jenkins/Dockerfile.backend'
                     }
