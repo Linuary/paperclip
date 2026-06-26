@@ -33,7 +33,7 @@ pipeline {
         choice(name: 'ACTION', choices: ['build+deploy', 'build', 'deploy', 'restart'], description: '执行动作')
         choice(name: 'TARGET_ENV', choices: ['local', 'dev', 'test', 'demo', 'staging', 'prod'], description: '目标环境')
         choice(name: 'DEPLOY_METHOD', choices: ['docker-compose', 'kubernetes'], description: '部署方式')
-        string(name: 'TARGET_HOST', defaultValue: 'localhost', description: '部署目标服务器')
+        string(name: 'TARGET_HOST', defaultValue: '172.19.25.144', description: '部署目标服务器')
         string(name: 'TARGET_USER', defaultValue: 'root', description: 'SSH 用户')
         string(name: 'TARGET_PORT', defaultValue: '22', description: 'SSH 端口')
         string(name: 'K8S_NAMESPACE', defaultValue: 'default', description: 'K8s 命名空间')
