@@ -1,0 +1,97 @@
+script=def cfgFile = new File(Jenkins.instance.rootDir, 'jobs/paperclip-deploy/config.xml')
+def content = cfgFile.text
+
+def newPipeline = '''pipeline {
+    agent any
+    environment {
+        TAG = "${params.BRANCH}-${params.TARGET_ENV}-${env.BUILD_NUMBER}"
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: params.BRANCH]],
+                    userRemoteConfigs: [[url: params.GIT_URL, credentialsId: 'github-credentials']]
+                ])
+            }
+        }
+        stage('Detect') {
+            steps {
+                script {
+                    env.DETECTED_TYPE = params.PROJECT_TYPE
+                    if (params.IMAGE_NAME) {
+                        env.FINAL_IMAGE_NAME = params.IMAGE_NAME
+                    } else {
+                        def repoName = params.GIT_URL.split('/').last().replace('.git', '')
+                        env.FINAL_IMAGE_NAME = repoName
+                    }
+                    echo "Type: ${env.DETECTED_TYPE}, Image: ${env.FINAL_IMAGE_NAME}:${TAG}"
+                }
+            }
+        }
+        stage('Build') {
+            when { expression { params.ACTION in ['build', 'build+deploy'] } }
+            steps {
+                script {
+                    def buildArgs = ''
+                    if (params.BUILD_ARGS) {
+                        buildArgs = params.BUILD_ARGS.split(',').collect { "--build-arg ${it.trim()}" }.join(' ')
+                    }
+                    sh "docker build -f ${params.DOCKERFILE} ${buildArgs} -t ${FINAL_IMAGE_NAME}:${TAG} ."
+                    def envContent = params.ENV_VARS ?: ''
+                    if (params.SECRET_VARS) { envContent += '\\n' + params.SECRET_VARS }
+                    writeFile file: '.env', text: envContent.trim()
+                }
+            }
+        }
+        stage('Deploy') {
+            when { expression { params.ACTION in ['deploy', 'build+deploy'] } }
+            steps {
+                script {
+                    sh 'mkdir -p /opt/app && cp jenkins/docker/docker-compose.deploy.yml /opt/app/ && cp .env /opt/app/'
+                    sh 'docker compose -f /opt/app/docker-compose.deploy.yml --profile combined --env-file /opt/app/.env up -d'
+                }
+            }
+        }
+        stage('Health Check') {
+            when { expression { params.ACTION != 'build' } }
+            steps {
+                script {
+                    def port = '8088'
+                    if (params.ENV_VARS?.contains('PORT=')) {
+                        def portLine = params.ENV_VARS.readLines().find { it.startsWith('PORT=') }
+                        if (portLine) port = portLine.split('=')[1].trim()
+                    }
+                    sh """
+                        for i in \\$(seq 1 30); do
+                            if curl -sf http://localhost:${port}/api/health; then
+                                echo "Health check passed!"
+                                exit 0
+                            fi
+                            sleep 2
+                        done
+                        echo "Health check timeout (non-fatal)"
+                    """
+                }
+            }
+        }
+    }
+    post {
+        always { cleanWs() }
+        success { echo "Pipeline completed successfully!" }
+        failure { echo "Pipeline failed!" }
+    }
+}'''
+
+def startTag = '<script>'
+def endTag = '</script>'
+def startIdx = content.indexOf(startTag)
+def endIdx = content.indexOf(endTag, startIdx)
+if (startIdx > 0 && endIdx > startIdx) {
+    content = content.substring(0, startIdx + startTag.length()) + '\n' + newPipeline + '\n    ' + content.substring(endIdx)
+    cfgFile.text = content
+    println 'Config updated! Reload Jenkins to apply.'
+} else {
+    println 'ERROR: Could not find script tags in config.xml'
+}

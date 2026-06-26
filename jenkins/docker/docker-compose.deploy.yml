@@ -26,7 +26,7 @@ services:
   # ============================================
   paperclip:
     image: ${IMAGE_NAME:-paperclip}:${IMAGE_TAG:-latest}
-    env_file: ${ENV_FILE:-.env}
+    env_file: .env
     ports:
       - "${PORT:-3100}:${PORT:-3100}"
     volumes:
@@ -56,7 +56,7 @@ services:
   # ============================================
   paperclip-server:
     image: ${SERVER_IMAGE_NAME:-paperclip-server}:${IMAGE_TAG:-latest}
-    env_file: ${ENV_FILE:-.env}
+    env_file: .env
     environment:
       SERVE_UI: "false"
     ports:

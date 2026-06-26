@@ -49,8 +49,6 @@ pipeline {
 
     environment {
         TAG = "${params.BRANCH}-${params.TARGET_ENV}-${env.BUILD_NUMBER}"
-        IS_LOCAL = (params.TARGET_HOST == 'localhost' || params.TARGET_HOST == '127.0.0.1')
-        IS_K8S = (params.DEPLOY_METHOD == 'kubernetes')
     }
 
     stages {
@@ -76,6 +74,10 @@ pipeline {
                     // 自动检测项目类型
                     env.DETECTED_TYPE = params.PROJECT_TYPE
 
+                    // 计算部署模式标志
+                    env.IS_LOCAL = (params.TARGET_HOST == 'localhost' || params.TARGET_HOST == '127.0.0.1') ? 'true' : 'false'
+                    env.IS_K8S = (params.DEPLOY_METHOD == 'kubernetes') ? 'true' : 'false'
+
                     // 自动生成镜像名
                     if (params.IMAGE_NAME) {
                         env.FINAL_IMAGE_NAME = params.IMAGE_NAME
@@ -94,6 +96,8 @@ pipeline {
                     echo "Target Env:   ${params.TARGET_ENV}"
                     echo "Deploy Method: ${params.DEPLOY_METHOD}"
                     echo "Target Host:  ${params.TARGET_HOST}"
+                    echo "Is Local:     ${env.IS_LOCAL}"
+                    echo "Is K8s:       ${env.IS_K8S}"
                     echo "========================================"
                 }
             }
@@ -151,7 +155,7 @@ pipeline {
                     writeFile file: '.env', text: envContent.trim()
 
                     // 推送到镜像仓库
-                    if (params.PUSH_REGISTRY && !IS_LOCAL.toBoolean()) {
+                    if (params.PUSH_REGISTRY && env.IS_LOCAL != 'true') {
                         sh "docker tag ${FINAL_IMAGE_NAME}:${TAG} ${FINAL_IMAGE_NAME}:latest"
                         withCredentials([usernamePassword(
                             credentialsId: 'docker-registry-auth',
@@ -165,7 +169,7 @@ pipeline {
                     }
 
                     // 远程部署且不推送仓库：导出 tar 包
-                    if (!IS_LOCAL.toBoolean() && !params.PUSH_REGISTRY && !IS_K8S.toBoolean()) {
+                    if (env.IS_LOCAL != 'true' && !params.PUSH_REGISTRY && env.IS_K8S != 'true') {
                         sh "docker save ${FINAL_IMAGE_NAME}:${TAG} | gzip > image.tar.gz"
                     }
                 }
@@ -179,18 +183,52 @@ pipeline {
             when { expression { params.ACTION in ['deploy', 'build+deploy'] } }
             steps {
                 script {
-                    if (IS_K8S.toBoolean()) {
+                    if (env.IS_K8S == 'true') {
+                        // Kubernetes 部署
                         sh """
                             kubectl set image deployment/${env.FINAL_IMAGE_NAME} \
-                                ${env.FINAL_IMAGE_NAME}=${FINAL_IMAGE_NAME}:${TAG} \
+                                ${env.FINAL_IMAGE_NAME}=${env.FINAL_IMAGE_NAME}:${TAG} \
                                 -n ${params.K8S_NAMESPACE}
                             kubectl rollout status deployment/${env.FINAL_IMAGE_NAME} \
                                 -n ${params.K8S_NAMESPACE} --timeout=300s
                         """
-                    } else {
+                    } else if (env.IS_LOCAL == 'true') {
                         // 本地部署（Jenkins agent 与目标服务器同机）
                         sh 'mkdir -p /opt/app && cp jenkins/docker/docker-compose.deploy.yml .env /opt/app/'
-                        sh 'docker compose -f jenkins/docker/docker-compose.deploy.yml --profile combined --env-file .env up -d'
+                        sh 'docker compose -f /opt/app/docker-compose.deploy.yml --profile combined --env-file /opt/app/.env up -d'
+                    } else {
+                        // 远程 SSH 部署
+                        withCredentials([sshUserPrivateKey(
+                            credentialsId: 'ssh-deploy-key',
+                            keyFileVariable: 'SSH_KEY'
+                        )]) {
+                            // 确定需要传输的文件
+                            def filesToCopy = 'jenkins/docker/docker-compose.deploy.yml .env'
+                            if (!params.PUSH_REGISTRY) {
+                                filesToCopy += ' image.tar.gz'
+                            }
+
+                            // 传输文件到远程服务器
+                            sh """
+                                ssh -i ${SSH_KEY} -p ${params.TARGET_PORT} -o StrictHostKeyChecking=no \
+                                    ${params.TARGET_USER}@${params.TARGET_HOST} \
+                                    "mkdir -p /opt/app"
+                                scp -i ${SSH_KEY} -P ${params.TARGET_PORT} -o StrictHostKeyChecking=no \
+                                    ${filesToCopy} \
+                                    ${params.TARGET_USER}@${params.TARGET_HOST}:/opt/app/
+                            """
+
+                            // 远程执行部署命令
+                            def deployCmd = params.PUSH_REGISTRY ? 'docker compose pull' : 'gunzip -c image.tar.gz | docker load'
+                            sh """
+                                ssh -i ${SSH_KEY} -p ${params.TARGET_PORT} -o StrictHostKeyChecking=no \
+                                    ${params.TARGET_USER}@${params.TARGET_HOST} << 'DEPLOY_EOF'
+                                    cd /opt/app
+                                    ${deployCmd}
+                                    docker compose -f docker-compose.deploy.yml --profile combined --env-file .env up -d
+DEPLOY_EOF
+                            """
+                        }
                     }
                 }
             }
@@ -203,10 +241,24 @@ pipeline {
             when { expression { params.ACTION == 'restart' } }
             steps {
                 script {
-                    if (IS_K8S.toBoolean()) {
+                    if (env.IS_K8S == 'true') {
+                        // Kubernetes 重启
                         sh "kubectl rollout restart deployment/${env.FINAL_IMAGE_NAME} -n ${params.K8S_NAMESPACE}"
+                    } else if (env.IS_LOCAL == 'true') {
+                        // 本地重启
+                        sh 'docker compose -f /opt/app/docker-compose.deploy.yml restart'
                     } else {
-                        sh 'docker compose -f jenkins/docker/docker-compose.deploy.yml restart'
+                        // 远程 SSH 重启
+                        withCredentials([sshUserPrivateKey(
+                            credentialsId: 'ssh-deploy-key',
+                            keyFileVariable: 'SSH_KEY'
+                        )]) {
+                            sh """
+                                ssh -i ${SSH_KEY} -p ${params.TARGET_PORT} -o StrictHostKeyChecking=no \
+                                    ${params.TARGET_USER}@${params.TARGET_HOST} \
+                                    "cd /opt/app && docker compose -f docker-compose.deploy.yml restart"
+                            """
+                        }
                     }
                 }
             }
@@ -219,9 +271,15 @@ pipeline {
             when { expression { params.ACTION != 'build' } }
             steps {
                 script {
-                    def baseUrl = IS_K8S.toBoolean()
-                        ? "http://${env.FINAL_IMAGE_NAME}.${params.K8S_NAMESPACE}.svc.cluster.local"
-                        : "http://localhost"
+                    // 确定检查目标
+                    def baseUrl
+                    if (env.IS_K8S == 'true') {
+                        baseUrl = "http://${env.FINAL_IMAGE_NAME}.${params.K8S_NAMESPACE}.svc.cluster.local"
+                    } else if (env.IS_LOCAL == 'true') {
+                        baseUrl = "http://localhost"
+                    } else {
+                        baseUrl = "http://${params.TARGET_HOST}"
+                    }
 
                     // 从 ENV_VARS 中提取 PORT
                     def port = '3100'

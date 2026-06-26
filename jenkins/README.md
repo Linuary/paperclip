@@ -28,7 +28,9 @@ jenkins/
 2. 创建 Credentials：
    - `ssh-deploy-key`：远程服务器 SSH 私钥
    - `docker-registry-auth`：镜像仓库认证（可选）
-3. 创建 Pipeline Job，指向本 `Jenkinsfile`
+   - `github-credentials`：GitHub 认证（可选，私有仓库需要）
+3. 敏感环境变量通过 `SECRET_VARS` 参数传入，Jenkins 会自动遮蔽
+4. 创建 Pipeline Job，指向本 `Jenkinsfile`
 
 ### 2. Paperclip 部署示例
 
@@ -47,13 +49,13 @@ jenkins/
 | TARGET_PORT | 22 |
 | PUSH_REGISTRY | false |
 | ENV_VARS | PORT=8088 |
-| SECRET_VARS | DATABASE_URL=postgres://multica:multica123@47.236.51.128:5432/paperclip |
+| SECRET_VARS | DATABASE_URL=postgres://user:pass@47.236.51.128:5432/paperclip（从 Jenkins Credentials 获取） |
 
 ### 3. 服务器信息
 
 - 目标主机：`47.236.51.128`
-- PostgreSQL：`47.236.51.128:5432`，账号 `multica`，密码 `multica123`
-- Redis：`47.236.51.128:7001`，密码 `cnhis`
+- PostgreSQL：`47.236.51.128:5432`（凭据通过 Jenkins Credentials 管理）
+- Redis：`47.236.51.128:7001`（凭据通过 Jenkins Credentials 管理）
 
 ## 支持的项目类型
 
