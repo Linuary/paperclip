@@ -11,6 +11,11 @@ mkdir -p $DEPLOY_DIR
 cp $SCRIPT_DIR/docker-compose.deploy.yml $DEPLOY_DIR/
 cp $SCRIPT_DIR/.env $DEPLOY_DIR/
 
+# 确保 .env 中有 BETTER_AUTH_SECRET
+if ! grep -q "BETTER_AUTH_SECRET" $DEPLOY_DIR/.env; then
+    echo "BETTER_AUTH_SECRET=paperclip-dev-secret" >> $DEPLOY_DIR/.env
+fi
+
 # 如果有镜像 tar 包，加载它
 if [ -f $SCRIPT_DIR/image.tar.gz ]; then
     echo "Loading Docker image..."
