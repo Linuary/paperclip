@@ -232,25 +232,25 @@ pipeline {
                                 filesToCopy += ' image.tar.gz'
                             }
 
-                            // 传输文件到远程服务器
+                            // 传输文件到远程服务器 /tmp/ 目录
                             sh """
-                                ssh -i \$SSH_KEY -p ${params.TARGET_PORT} -o StrictHostKeyChecking=no \
-                                    \$SSH_USER@${params.TARGET_HOST} \
-                                    "mkdir -p /opt/app"
-                                scp -i \$SSH_KEY -P ${params.TARGET_PORT} -o StrictHostKeyChecking=no \
+                                scp -i \$SSH_KEY -o StrictHostKeyChecking=no \
                                     ${filesToCopy} \
-                                    \$SSH_USER@${params.TARGET_HOST}:/opt/app/
+                                    \$SSH_USER@${params.TARGET_HOST}:/tmp/
                             """
 
-                            // 远程执行部署命令
-                            def deployCmd = params.PUSH_REGISTRY ? 'docker compose pull' : 'gunzip -c image.tar.gz | docker load'
+                            // 传输部署脚本
                             sh """
-                                ssh -i \$SSH_KEY -p ${params.TARGET_PORT} -o StrictHostKeyChecking=no \
-                                    \$SSH_USER@${params.TARGET_HOST} << 'DEPLOY_EOF'
-                                    cd /opt/app
-                                    ${deployCmd}
-                                    docker compose -f docker-compose.deploy.yml --profile combined ${profilesArg} --env-file .env up -d
-DEPLOY_EOF
+                                scp -i \$SSH_KEY -o StrictHostKeyChecking=no \
+                                    jenkins/scripts/remote-deploy.sh \
+                                    \$SSH_USER@${params.TARGET_HOST}:/tmp/
+                            """
+
+                            // 设置环境变量并执行远程部署脚本
+                            sh """
+                                ssh -i \$SSH_KEY -o StrictHostKeyChecking=no \
+                                    \$SSH_USER@${params.TARGET_HOST} \
+                                    "export AI_PROFILES='${profilesArg}' && bash /tmp/remote-deploy.sh"
                             """
                         }
                     }
