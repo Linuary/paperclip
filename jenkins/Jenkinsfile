@@ -6,7 +6,7 @@
  */
 
 pipeline {
-    agent { label 'docker' }
+    agent any
 
     parameters {
         // ---- 代码来源 ----
