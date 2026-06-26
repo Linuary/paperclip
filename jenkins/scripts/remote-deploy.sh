@@ -48,8 +48,27 @@ echo "===================="
 # 确定部署模式 profile
 DEPLOY_PROFILE=${DEPLOY_MODE:-combined}
 
+# 确定是否使用外部数据库
+USE_EXTERNAL_DB=${USE_EXTERNAL_DB:-true}
+
+# 构建 docker-compose 命令
+COMPOSE_CMD="docker compose -f docker-compose.deploy.yml --profile $DEPLOY_PROFILE"
+
+# 如果不使用外部数据库，添加 db profile
+if [ "$USE_EXTERNAL_DB" = "false" ]; then
+    echo "Using internal PostgreSQL container..."
+    COMPOSE_CMD="$COMPOSE_CMD --profile db"
+else
+    echo "Using external database..."
+fi
+
+# 添加 AI CLI profiles
+if [ -n "$AI_PROFILES" ]; then
+    COMPOSE_CMD="$COMPOSE_CMD $AI_PROFILES"
+fi
+
 # 执行部署
-echo "Starting deployment (mode: $DEPLOY_PROFILE)..."
-docker compose -f docker-compose.deploy.yml --profile $DEPLOY_PROFILE ${AI_PROFILES} --env-file .env up -d
+echo "Starting deployment (mode: $DEPLOY_PROFILE, external_db: $USE_EXTERNAL_DB)..."
+$COMPOSE_CMD --env-file .env up -d
 
 echo "Deployment completed!"

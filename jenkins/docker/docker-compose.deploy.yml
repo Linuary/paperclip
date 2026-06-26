@@ -20,7 +20,7 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
-    profiles: ["combined", "split"]
+    profiles: ["db"]
 
   # ============================================
   # 合并模式：前后端一体（不含 AI CLI）
@@ -33,9 +33,6 @@ services:
       - "${PORT:-3100}:${PORT:-3100}"
     volumes:
       - paperclip-data:/paperclip
-    depends_on:
-      db:
-        condition: service_healthy
     restart: unless-stopped
     profiles: ["combined"]
 

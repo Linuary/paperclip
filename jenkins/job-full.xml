@@ -108,6 +108,11 @@
           </choices>
           <description>部署方式</description>
         </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>USE_EXTERNAL_DB</name>
+          <defaultValue>true</defaultValue>
+          <description>使用外部数据库（true=连接外部DB，false=创建内部PG容器）</description>
+        </hudson.model.BooleanParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>TARGET_HOST</name>
           <defaultValue>172.19.25.144</defaultValue>
