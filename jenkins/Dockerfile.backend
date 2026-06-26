@@ -44,7 +44,7 @@ COPY packages/plugins/plugin-workspace-diff/package.json packages/plugins/plugin
 COPY patches/ patches/
 COPY scripts/link-plugin-dev-sdk.mjs scripts/
 
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile && pnpm store prune
 
 # ---- Stage 3: Build ----
 FROM base AS build
